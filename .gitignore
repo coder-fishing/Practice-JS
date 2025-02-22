@@ -22,7 +22,3 @@ build/
 # OS specific files
 .DS_Store
 Thumbs.db
-
-# Parcel cache
-.cache/
-.parcel-cache/
