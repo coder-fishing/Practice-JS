@@ -2,13 +2,14 @@
 @use '../base/' as *;
 
 .main-right{
-    background-color: $main;
+    background-color: $neutralGray50;
     display: flex;
-    padding: 1.5rem 0;
+    padding: 1.5rem ;
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
     flex: 1 0 0;
     align-self: stretch;
     min-height: 100vh;
+
 }
