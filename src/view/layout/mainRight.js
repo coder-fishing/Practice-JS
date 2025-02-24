@@ -4,7 +4,8 @@ const mainRight = () => {
    return `
       <div class="main-right"> 
           ${header()}
-         
+          <div class="content" id="content">
+        
       </div>   
     `
 }

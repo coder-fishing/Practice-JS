@@ -8,4 +8,4 @@ const searchBar = ( placeHolder) => {
     `;
 }
  
-export default searchBar;   
+export default searchBar;     

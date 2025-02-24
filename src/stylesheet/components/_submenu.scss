@@ -19,6 +19,10 @@
         line-height: 1.25rem; 
         letter-spacing: 0.00438rem;
 
+        // &:hover{
+        //     color: $primary500;
+        // }
+
     }
 
     &__notification {
@@ -46,11 +50,12 @@
         border-left: 4px solid $primary500;
         background : $primary50;
         cursor: pointer;
+        color:  $primary500;
     }
     &:active{
         border-left: 4px solid $primary500;
         background : $primary50;
-        
+        color:  $primary500;
     }
 
     
