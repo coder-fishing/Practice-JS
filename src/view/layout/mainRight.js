@@ -1,7 +1,10 @@
+import header from "../components/header";
+
 const mainRight = () => {
    return `
-      <div class="main-right">
-    
+      <div class="main-right"> 
+          ${header()}
+         
       </div>   
     `
 }

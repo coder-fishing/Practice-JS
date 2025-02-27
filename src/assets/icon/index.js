@@ -24,3 +24,13 @@ export { default as calendarHover } from './fi-sr-calendar-hover.svg';
 export { default as user } from './fi-sr-folder.svg';  
 export { default as userHover } from './fi-sr-calendar.svg';
 
+export { default as notification } from './notification.svg';
+export { default as envelop } from './fi-sr-envelope.svg';
+export { default as divider } from './divider.svg';
+export { default as noImg } from './noImg.svg';
+export { default as noAvt } from './noAvt.svg';
+export { default as bell } from './fi-sr-bell.svg';
+export { default as search } from './fi-rr-search.svg';
+
+
+
