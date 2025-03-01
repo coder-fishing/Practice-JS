@@ -10,12 +10,12 @@ import {
 
  
 const menuItems = [
-    { name: 'Product', notification: 3 },
-    { name: 'Categories', notification: 5 },
-    { name: 'Orders', notification: 0 },  
-    { name: 'Customer', notification: 2 }
+    { name: 'Product', notification: 3 ,link: '#products'},
+    { name: 'Categories', notification: 5 ,link: '#categories'},
+    { name: 'Orders', notification: 0 , link: '#'},  
+    { name: 'Customer', notification: 2 , link: '#'},
   ];
-const subMenuItems = menuItems.map( item =>  subMenu(item.name,item.notification)).join('')
+const subMenuItems = menuItems.map( item =>  subMenu(item.name,item.notification,item.link)).join('')
 const totalNotifications =  getTotalNotifications()
 
 const navigation = () => {
