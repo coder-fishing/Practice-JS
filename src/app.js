@@ -1,18 +1,17 @@
-import navigation from './view/layout/navigation.js';
-import mainRight from './view/layout/mainRight.js';
-import navigationController from './controller/navigationController.js';
+import  ProductListView  from './view/pages/productList'
+import categoriesList from './view/pages/categoriesList.js'
+import { CategoryController } from './controller/categories.controller.js'
+import { ProductController } from './controller/product.controller.js'
+import { Router } from './router'
+import { DashboardController } from './controller/dashboard.controller'
+import { DashboardView } from './view/pages/editProduct'
+import addProduct from './view/pages/addProduct.js'
 
+const routes = [
+    { path: '/product', ccontroller:ProductController,view:ProductListView },
+    { path:'/', controller:DashboardController , view:DashboardView  },
+    { path:'/category' , controller:CategoryController, view:categoriesList},
+    { path: '/addproduct', controller:ProductController, view:addProduct}
+]
 
-const app = () => {
-    return `
-        <div class="container">
-            ${navigation()}
-            ${mainRight()}
-        </div>
-    `;
-}
-    
-        document.querySelector('.root').innerHTML = app();
-        navigationController();
-
-export default app;
+new Router(routes)

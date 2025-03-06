@@ -154,9 +154,18 @@
                     cursor: pointer;
                     background-color: $primary50;
                 }
+                &:hover > span{
+                    color: $primary500;
+                }
+
+                &.item-active {
+                    background-color: $primary50;
+                }
+                &.item-active > span{
+                    color: $primary500;
+                }
 
               
-
                 &-element{
                     font-size: 0.875rem;
                     font-style: normal;
@@ -165,10 +174,6 @@
                     letter-spacing: 0.00438rem;
                     color: $neutralGray500;
      
-                }
-
-                &:active > span{
-                    color: $primary500;
                 }
             } 
 
@@ -190,7 +195,7 @@
 
     .product-table{
         overflow: auto;
-        border-radius: 0.75rem;
+        border-radius:  0.75rem 0.75rem 0 0;
         box-shadow: 0px 4px 30px 0px rgba(46, 45, 116, 0.05);
         &-header{
             vertical-align: middle;
@@ -254,7 +259,7 @@
         padding: 1.125rem 1.5rem;
         display: flex;
         margin-top: -1.5rem;
-        border-radius: .75rem;
+        border-radius:0 0 .75rem .75rem;
         overflow: auto;
         box-shadow: 0 4px 30px #2e2d740d;
 
@@ -280,7 +285,7 @@
             border-radius: 0.5rem;
 
             &:hover{
-                background-color: $neutralGray500;
+                background-color: $neutralWhite;
             }
         }
         &-caret-right {
@@ -293,7 +298,7 @@
             border-radius: 0.5rem;
 
             &:hover{
-                background-color: $neutralGray500;
+                background-color: $neutralWhite;
             }
         }
         &-page-number {

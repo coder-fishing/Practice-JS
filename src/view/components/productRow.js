@@ -1,21 +1,21 @@
 import { eye, trash, pencil, checkbox ,checkicon , noAvt} from "../../assets/icon/index.js";
 const ProductRow = ({ product }) => {
   return (`
-      <tr class="product-table__row">
+      <tr class="product-table__row ">
           <td class="product-table__item"> 
             <div class="product-table__name">
                 <div class="product-table__name__checkbox">
                       <img src="${checkbox}" alt="checkbox" class="product-table__name__checkbox--box"/>
-                      <img src="${checkicon}" alr="check" class="product-table__name__checkbox--check"/>
-                  </div>  
-                  <div  class="product-table__container">
+                      <img src="${checkicon}" alt="check" class="product-table__name__checkbox--check "/>
+                  </div>   
+                  <div  class="product-table__container">  
                       <figure class="product-table__container--image">
                           <img src="${noAvt}" alt="product image"/>
-                      </figure> 
+                      </figure>    
                       <div class="product-table__container--decs">
                           <p class="product-table__container--decs--name">${product.name}</p>
                           <p class="product-table__container--decs--variants">${product.variants}</p>
-                      </div> 
+                      </div>  
                   </div> 
             </div>     
          </td>  
@@ -33,12 +33,16 @@ const ProductRow = ({ product }) => {
                 <div class="product-table__item--price">${product.price}</div>
           </td> 
           <td class="product-table__item ">
-                <div class="product-table__item--status">
-                    <div class="product-table__item--status-${product.status.replace(/\s+/g, '-').toLowerCase()}">
-                        <p class="product-table__item--status-${product.status.replace(/\s+/g, '-').toLowerCase()}-text">${product.status}</p>
-                   </div>
-                </div> 
-          </td>  
+                  <div class="product-table__item--status">
+                        <div class="product-table__item--status-${(product.status || '').replace(/\s+/g, '-').toLowerCase()}">
+                              <p class="product-table__item--status-${(product.status || '').replace(/\s+/g, '-').toLowerCase()}-text">${product.status || 'Unknown'}</p>
+                        </div>
+                  </div> 
+          </td>
+
+
+
+          
           <td class="product-table__item">
                 <div class="product-table__item--added">${product.added}</div>
           </td>
@@ -53,10 +57,10 @@ const ProductRow = ({ product }) => {
                   <span class="product-table__delete">
                         <img src="${trash}"/>
                   </span> 
-          </td>
+          </td> 
       </tr>
   `);
+  
 };
-
 
 export default ProductRow;

@@ -1,209 +1,241 @@
-import {
-    caretRight,
-    download,
-    add,
-    caretDown,
-    checkbox,
-    caretLeft,
-    minus,
-} from '../../assets/icon/index.js';
-import searchBar from '../components/searchBar.js';
-import ProductRow from '../components/productRow.js';
+import { caretRight, download, add, caretLeft, checkbox, minus, caretDown } from "./../../assets/icon";
+import searchBar from "./../components/searchBar";
+import ProductRow from "./../components/productRow";  
 
-const products = Array.from({ length: 10 }, (_, i) => ({
-    name: `Product ${i + 1}`,
-    sku: `SKU00${i + 1}`,
-    category: `Category ${(i % 3) + 1}`,
-    stock: Math.floor(Math.random() * 50),
-    price: Math.floor(Math.random() * 500) + 50,
-    status: ['published', 'low-stock', 'draft', 'out of stock'][i % 4],
-    added: `2025-02-${String(20 + i).padStart(2, '0')}`,
-}));
+class ProductListView {
+  constructor(products = []) {
+    this.products = products.length ? products : Array.from({ length: 50 }, (_, i) => ({
+      id: i + 1,
+      name: `Product ${i + 1}`,
+      price: (i + 1) * 10,
+      status: i % 4 === 0 
+      ? "Low Stock" 
+      : i % 4 === 1 
+      ? "Out of Stock" 
+      : i % 4 === 2 
+      ? "Draft" 
+      : "Published"
+    }));
+    this.currentPage = 1;
+    this.itemsPerPage = 8;
+    this.init();
+  }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const prevBtn = document.querySelector('#prevbtn');
-    const nextBtn = document.querySelector('#nextbtn');
-    const pageNumbersContainer = document.getElementById('page-numbers');
-    let currentPage = 1;
-    const maxPage = 10;
+  init() {
+    document.addEventListener("DOMContentLoaded", () => {
+      this.render();
+    }); 
+  }
 
-    function renderPagination() {
-        pageNumbersContainer.innerHTML = '';
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(maxPage, startPage + 4);
-
-        for (let i = startPage; i <= endPage; i++) {
-            createPageButton(i);
-        } 
-
-        if (endPage < maxPage) {
-            const dots = document.createElement('div');
-            dots.textContent = '...';
-            dots.classList.add('dots');
-            pageNumbersContainer.appendChild(dots);
-        }
-    }
-    function createPageButton(page) {
-        const button = document.createElement('button');
-        button.classList.add('page-btn');
-        if (page === currentPage) button.classList.add('active');
-        button.textContent = page;
-        button.addEventListener('click', () => {
-            currentPage = page;
-            renderPagination();
-        });
-        pageNumbersContainer.appendChild(button);
-    }
-
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderPagination();
-        }
+  setupPaginationEvents() {
+    document.querySelector("#prevbtn").addEventListener("click", () => {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.render();
+      } 
     });
 
-    nextBtn.addEventListener('click', () => {
-        if (currentPage < maxPage) {
-            currentPage++;
-            renderPagination();
-        }
+    document.querySelector("#nextbtn").addEventListener("click", () => {
+      if (this.currentPage < this.maxPage) {
+        this.currentPage++;
+        this.render();
+      }
     });
+  }
 
-    renderPagination();
-});
+  getPaginatedProducts() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.products.slice(start, end);
+  }
 
-function productList() {
-    return `   
-        <div class="product-list"> 
-            <div class="product-title">
-                <div class="product-title-left">
-                    <p class="product-title-left__name">Product</p>
-                    <div class="product-title-left__breadcrumb">
-                        <p class="product-title-left__breadcrumb--active">Dashboard</p>
-                        <figure> 
-                            <img src="${caretRight}" alt="arrow right" class="product-title__icon" />
-                        </figure>   
-                        <p class="product-title-left__breadcrumb--normal">Product List</p>
-                    </div>  
-                </div>  
-                <div class="product-title__buttons">
-                    <button class="product-title__buttons--download">
-                        <img src="${download}" alt="icon" class="button__icon" />
-                        <span class="button__text">Export</span>
-                    </button>  
-                    <button class="product-title__buttons--add">
-                        <img src="${add}" alt="icon" class="button__icon" />
-                        <span class="button__text">Add product</span>
-                    </button> 
-                </div>  
-            </div>  
-      
-            <div class="tag-add-searchbar">   
-                <div class="tag-add-searchbar__tag">  
-                    <div class="tag-add-searchbar__tag--item">
-                        <span class="tag-add-searchbar__tag--item-element">All Products</span>
-                     </div>
-                     <div class="tag-add-searchbar__tag--item">
-                        <span class="tag-add-searchbar__tag--item-element">Published</span>
-                     </div> 
-                     <div class="tag-add-searchbar__tag--item tag-add-searchbar__tag--item--active">
-                        <span class="tag-add-searchbar__tag--item-element">Low Stock</span>
-                     </div>
-                     <div class="tag-add-searchbar__tag--item">
-                        <span class="tag-add-searchbar__tag--item-element">Draft</span>
-                     </div>
-                </div> 
-                <div class="tag-add-searchbar__search">
-                     ${searchBar('Search product. . .')}  
-                </div>  
-            </div>   
-   
-            <table class="product-table"> 
-                <thead> 
-                    <tr>
-                        <th class="product-table-header">
-                            <div class="product-table-header__wrapper three">
-                                <div class="product-table-header__image">
-                                    <div class="product-table-header__imageleft">
-                                        <img class="product-table-header__imageleft--first" src="${checkbox}" alt="checkbox"/>
-                                        <img class="product-table-header__imageleft--second" src="${minus}" alt="tick/">
-                                    </div>
-                                    <p class="product-table-header__name translate">Product</p>  
-                                </div> 
-                                <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
-                            </div>
-                        </th> 
-        
-                        <th class="product-table-header">
-                            <div class="product-table-header__wrapper"><p class="product-table-header__name">SKU</p></div>
-                        </th>
-        
-                        <th class="product-table-header">   
-                            <div class="product-table-header__wrapper"><p class="product-table-header__name">Category</p></div>
-                        </th> 
-          
-                        <th class="product-table-header">
-                           <div class="product-table-header__wrapper two">
-                                <div class="product-table-header__name">Stock</div>
-                                <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
-                           </div>
-                        </th>
-         
-                        <th  class="product-table-header">
-                            <div class="product-table-header__wrapper two">
-                                <div class="product-table-header__name">Price</div>
-                                <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
-                            </div>
-                        </th> 
-        
-                        <th class="product-table-header">
-                            <div class="product-table-header__wrapper two">
-                                <p class="product-table-header__name">Status</p>
-                                <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
-                            </div>
-                        </th>
-        
-                        <th class="product-table-header">
-                            <div class="product-table-header__wrapper two">
-                                <p class="product-table-header__name">Added</p>
-                                <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
-                            </div>
-                        </th>
-        
-                        <th class="product-table-header">
-                           <div class="product-table-header__wrapper"> <p class="product-table-header__name">Action</p></div>
-                        </th>
-                    </tr>
-                </thead> 
-                <tbody>
-                         ${products.map((product) => ProductRow({ product })).join('')}
-                </tbody>  
-            </table> 
-            <div>
-                <div class="pagination">
-                    <div class="pagination__showing" ">
-                        Showing 1-10 from 100
+  renderPagination() {
+    const pageNumbersContainer = document.getElementById("page-numbers");
+    pageNumbersContainer.innerHTML = "";
+
+    let startPage = Math.max(1, this.currentPage - 2);
+    let endPage = Math.min(this.maxPage, startPage + 4);
+
+    for (let i = startPage; i <= endPage; i++) {
+      const button = document.createElement("button");
+      button.classList.add("page-btn");
+      if (i === this.currentPage) button.classList.add("active");
+      button.textContent = i;
+      button.addEventListener("click", () => {
+        this.currentPage = i;
+        this.render();
+      });
+      pageNumbersContainer.appendChild(button);
+    }
+
+    if (endPage < this.maxPage) {
+      const dots = document.createElement("div");
+      dots.textContent = "...";
+      dots.classList.add("dots");
+      pageNumbersContainer.appendChild(dots);
+    }
+  }
+
+  clickTable = () => {
+    const cliks = document.querySelectorAll('.product-table__name__checkbox--check');
+    const checks = document.querySelectorAll(".product-table__row");
+
+    cliks.forEach((clik, index) => {
+      clik.addEventListener('click', () => {
+        clik.classList.toggle('checkactive'); // Toggle class checkactive cho phần tử được nhấp
+        checks[index].classList.toggle('rowactive'); // Toggle class rowactive cho hàng tương ứng
+        //toggle thêm nếu chưa có hủy nếu có else
+      }); 
+    });
+  } 
+
+  clickTagItem = () => {
+    const tags = document.querySelectorAll('.tag-add-searchbar__tag--item');
+    tags.forEach(tag => {
+      tag.addEventListener('click', () => {
+        tags.forEach(t => t.classList.remove('item-active'));
+        tag.classList.toggle('item-active');
+        console.log('hehe');
+      });
+    });
+  };
+  
+  render() {
+    this.maxPage = Math.ceil(this.products.length / this.itemsPerPage) || 1;
+    const paginatedProducts = this.getPaginatedProducts();
+
+    const bin = `
+      <div class="product-list">
+        <div class="product-title">
+          <div class="product-title-left">
+            <p class="product-title-left__name">Product</p>
+            <div class="product-title-left__breadcrumb">
+              <p class="product-title-left__breadcrumb--active">Dashboard</p>
+              <figure>
+                <img src="${caretRight}" alt="arrow right" class="product-title__icon" />
+              </figure>
+              <p class="product-title-left__breadcrumb--normal">Product List</p>
+            </div>
+          </div>
+          <div class="product-title__buttons">
+            <button class="product-title__buttons--download">
+              <img src="${download}" alt="icon" class="button__icon" />
+              <span class="button__text">Export</span>
+            </button>
+            <a href="addproduct">
+              <button class="product-title__buttons--add">
+                <img src="${add}" alt="icon" class="button__icon" />
+                <span class="button__text">Add product</span>
+              </button>
+            </a>
+          </div>
+        </div>
+ 
+        <div class="tag-add-searchbar"> 
+          <div class="tag-add-searchbar__tag">
+            <div class="tag-add-searchbar__tag--item">
+              <span class="tag-add-searchbar__tag--item-element ">All Products</span>
+            </div>
+            <div class="tag-add-searchbar__tag--item ">
+              <span class="tag-add-searchbar__tag--item-element">Published</span>
+            </div> 
+            <div class="tag-add-searchbar__tag--item ">
+              <span class="tag-add-searchbar__tag--item-element">Low Stock</span>
+            </div>
+           <div class="tag-add-searchbar__tag--item">
+              <span class="tag-add-searchbar__tag--item-element">Draft</span>
+            </div>
+          </div>
+          <div class="tag-add-searchbar__search">
+            ${searchBar("Search product. . .")}
+          </div>
+        </div>
+
+        <table class="product-table">
+          <thead>
+          <tr>
+            <th class="product-table-header">
+              <div class="product-table-header__wrapper three">
+              <div class="product-table-header__image">
+                  <div class="product-table-header__imageleft">
+                      <img class="product-table-header__imageleft--first" src="${checkbox}" alt="checkbox"/>
+                      <img class="product-table-header__imageleft--second" src="${minus}" alt="tick/">
+                  </div>
+                  <p class="product-table-header__name translate">Product</p>  
+              </div> 
+              <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
                     </div>
-                    <div class="pagination__button" >            
-                        <div class="pagination__button-caret-left" id="prevbtn">
-                            <figure class="image"><img src="${caretLeft}" alt="caret left"  /></figure>
-                        </div>  
-                        <div class="pagination__button-page-number" id="page-numbers"> 
-                            <div class="page-btn">1</div>
-                            <div class="page-btn">2</div>
-                            <div class="page-btn">3</div>
-                            <div class="page-btn">4</div>
-                            <div class="page-btn">5</div>
-                            <div class="dots">...</div> 
-                        </div>
-                            <div class="pagination__button-caret-right" id="nextbtn">
-                                <figure class="image"><img src="${caretLeft}" alt="caret right" /></figure>
-                            </div> 
-                        </div>      
-                    </div> 
-                </div>
-        </div> 
+                </th> 
+        
+                <th class="product-table-header">
+                    <div class="product-table-header__wrapper"><p class="product-table-header__name">SKU</p></div>
+                </th>
+        
+                <th class="product-table-header">   
+                    <div class="product-table-header__wrapper"><p class="product-table-header__name">Category</p></div>
+                </th> 
+              
+                <th class="product-table-header">
+                   <div class="product-table-header__wrapper two">
+              <div class="product-table-header__name">Stock</div>
+              <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
+                   </div>
+                </th>
+         
+                <th  class="product-table-header">
+                    <div class="product-table-header__wrapper two">
+              <div class="product-table-header__name">Price</div>
+              <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
+                    </div>
+                </th> 
+        
+                <th class="product-table-header">
+                    <div class="product-table-header__wrapper two">
+              <p class="product-table-header__name">Status</p>
+              <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
+                    </div>
+                </th>
+        
+                <th class="product-table-header">
+                    <div class="product-table-header__wrapper two">
+              <p class="product-table-header__name">Added</p>
+              <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
+                    </div>
+                </th>
+        
+                <th class="product-table-header">
+                   <div class="product-table-header__wrapper"> <p class="product-table-header__name">Action</p></div>
+                </th>
+            </tr>
+          </thead>
+          <tbody>
+            ${paginatedProducts.map(product => ProductRow({ product })).join('')}
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <div class="pagination__showing">
+            Showing ${(this.currentPage - 1) * this.itemsPerPage + 1}-${Math.min(this.currentPage * this.itemsPerPage, this.products.length)} from ${this.products.length}
+          </div>
+          <div class="pagination__button">
+            <div class="pagination__button-caret-left" id="prevbtn">
+              <figure class="image"><img src="${caretLeft}" alt="caret left" /></figure>
+            </div>
+            <div class="pagination__button-page-number" id="page-numbers"></div>
+            <div class="pagination__button-caret-right" id="nextbtn">
+              <figure class="image"><img src="${caretLeft}" alt="caret right" /></figure>
+            </div>
+          </div>
+        </div>
+      </div>
     `;
+
+    document.querySelector("#content").innerHTML = bin;
+    this.renderPagination(); 
+    this.setupPaginationEvents();
+    this.clickTable();
+    this.clickTagItem();
+  }
 }
 
-export default productList;
+export default ProductListView;

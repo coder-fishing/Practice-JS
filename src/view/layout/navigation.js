@@ -10,8 +10,8 @@ import {
 
  
 const menuItems = [
-    { name: 'Product', notification: 3 ,link: '#products'},
-    { name: 'Categories', notification: 5 ,link: '#categories'},
+    { name: 'Product', notification: 3 ,link: 'product'},
+    { name: 'Categories', notification: 5 ,link: 'category'},
     { name: 'Orders', notification: 0 , link: '#'},  
     { name: 'Customer', notification: 2 , link: '#'},
   ];
@@ -38,8 +38,38 @@ const navigation = () => {
             ${navigationItem(comment, commentHover, 'Chat')}
             ${navigationItem(calendar, calendarHover, 'Calendar')}  
         </div>  
-    `;
+    `; 
 };
-
+document.addEventListener("DOMContentLoaded", () => {
+    const ecommerceMenu = document.getElementById("ecommerceMenu");
+    const subMenuContainer = document.getElementById("subMenuContainer");
+    const icons = document.querySelectorAll(".navigation-item__down--hover");
+    const iconnormals = document.querySelectorAll(".navigation-item__down");
+    const iconnormal = iconnormals[0]
+    const icon = icons[0];
+    // Toggle menu khi nhấp
+    ecommerceMenu.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isActive = ecommerceMenu.classList.toggle("active");
+      subMenuContainer.style.display = isActive ? "block" : "none";
+      icon.style.transform = isActive ? "rotate(180deg)" : "rotate(0deg)"; 
+      iconnormal.style.display = isActive ? "none" : "block"; 
+    });
+  
+    // Giữ trạng thái active khi hover vào submenu
+    subMenuContainer.addEventListener("mouseenter", () => {
+      ecommerceMenu.classList.add("active");
+      subMenuContainer.style.display = "block";
+      icon.style.transform = "rotate(180deg)";
+    });
+  
+    // Ẩn submenu khi rời chuột, trừ khi đang active từ click
+    subMenuContainer.addEventListener("mouseleave", () => {
+      if (!ecommerceMenu.classList.contains("active")) {
+        subMenuContainer.style.display = "none";
+        icon.style.transform = "rotate(0deg)";
+      }
+    });
+  });
 
 export default navigation;

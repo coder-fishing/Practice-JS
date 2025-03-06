@@ -3,7 +3,7 @@
 
 .navigation-item {
     &:hover,
-    &:active{
+    &.active{
         
         .navigation-item__down--hover{
             opacity: 1;
