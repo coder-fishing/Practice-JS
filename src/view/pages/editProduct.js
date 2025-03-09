@@ -1,7 +1,8 @@
-function editProduct() {
-    return ( `
-        <h1> editProduct </h1>
-        ` );
+export class DashboardView {
+    constructor() {
+      this.render();
+    }
+    render() {
+      document.querySelector(".content").innerHTML = `<div><h1>Hello, Dashboard!</h1></div>`;
+    }
 }
-
-export default editProduct;

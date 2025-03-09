@@ -8,9 +8,9 @@ export class Router {
         this.loadInitialRoute();
         window.addEventListener('popstate', () => this.loadRoute());
     }
+ 
 
-
-    loadInitialRoute() {
+    loadInitialRoute() {  
         this.loadRoute(location.pathname);
     } 
 
@@ -18,3 +18,13 @@ export class Router {
         history.pushState({}, '', path);
         this.loadRoute(path); 
     }
+    loadRoute(path = location.pathname) {
+        const route = this.routes.find((r) => r.path === path);
+        if (route) {
+          document.querySelector("#app").innerHTML = Layout();
+           new route.controller(new route.view());
+        } else {
+          document.getElementById("app").innerHTML = "<h2>404 Not Found</h2>";
+        }
+    }
+}  
