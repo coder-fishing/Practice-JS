@@ -2,7 +2,7 @@
 @use '../base/' as *;
 
 .main-right{
-    background-color: $neutralGray50;
+    background-color: $neutralGray25;
     display: flex;
     padding: 1.5rem ;
     flex-direction: column;
@@ -10,5 +10,13 @@
     gap: 1.5rem;
     flex: 1 0 0;
     align-self: stretch;
-    min-height: 100vh;
+    max-height: 100vh;
+;
+
+    .content{
+        width: 100%;
+        // overflow: auto;
+        flex: 1;
+        
+    }
 }

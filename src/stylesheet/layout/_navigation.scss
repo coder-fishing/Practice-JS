@@ -10,7 +10,8 @@
      align-items: flex-start;
      flex-shrink: 0;
      align-self: stretch;
-     height: 100vh;
+     max-height: 100vh;
+    //  position: sticky;
 
      border-radius: 1px solid $neutralGray50;
      box-shadow: 4px 0px 30px 0px rgba(131, 98, 234, 0.05);

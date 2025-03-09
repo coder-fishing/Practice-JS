@@ -10,12 +10,12 @@ import {
 
  
 const menuItems = [
-    { name: 'Product', notification: 3 },
-    { name: 'Categories', notification: 5 },
-    { name: 'Orders', notification: 0 },  
-    { name: 'Customer', notification: 2 }
+    { name: 'Product', notification: 3 ,link: 'product'},
+    { name: 'Categories', notification: 5 ,link: 'category'},
+    { name: 'Orders', notification: 0 , link: '#'},  
+    { name: 'Customer', notification: 2 , link: '#'},
   ];
-const subMenuItems = menuItems.map( item =>  subMenu(item.name,item.notification)).join('')
+const subMenuItems = menuItems.map( item =>  subMenu(item.name,item.notification,item.link)).join('')
 const totalNotifications =  getTotalNotifications()
 
 const navigation = () => {
@@ -38,50 +38,39 @@ const navigation = () => {
             ${navigationItem(comment, commentHover, 'Chat')}
             ${navigationItem(calendar, calendarHover, 'Calendar')}  
         </div>  
-    `;
+    `; 
 };
-
 document.addEventListener("DOMContentLoaded", () => {
     const ecommerceMenu = document.getElementById("ecommerceMenu");
     const subMenuContainer = document.getElementById("subMenuContainer");
-
-    // Khi nhấn vào "E-Commerce"
+    const icons = document.querySelectorAll(".navigation-item__down--hover");
+    const iconnormals = document.querySelectorAll(".navigation-item__down");
+    const iconnormal = iconnormals[0]
+    const icon = icons[0];
+    // Toggle menu khi nhấp
     ecommerceMenu.addEventListener("click", (event) => {
-        event.stopPropagation(); // Ngăn sự kiện lan ra ngoài
-        const isVisible = subMenuContainer.style.display === "block";
-
-        if (!isVisible) {
-            ecommerceMenu.classList.add("active"); // Giữ trạng thái active
-            subMenuContainer.style.display = "block";
-        } else {
-            ecommerceMenu.classList.remove("active");
-            subMenuContainer.style.display = "none";
-        }
+      event.stopPropagation();
+      const isActive = ecommerceMenu.classList.toggle("active");
+      subMenuContainer.style.display = isActive ? "block" : "none";
+      icon.style.transform = isActive ? "rotate(180deg)" : "rotate(0deg)"; 
+      iconnormal.style.display = isActive ? "none" : "block"; 
     });
-
-    // Giữ trạng thái hover khi di chuột vào submenu
+  
+    // Giữ trạng thái active khi hover vào submenu
     subMenuContainer.addEventListener("mouseenter", () => {
-        ecommerceMenu.classList.add("active");
+      ecommerceMenu.classList.add("active");
+      subMenuContainer.style.display = "block";
+      icon.style.transform = "rotate(180deg)";
     });
-
+  
+    // Ẩn submenu khi rời chuột, trừ khi đang active từ click
     subMenuContainer.addEventListener("mouseleave", () => {
-        if (subMenuContainer.style.display !== "block") {
-            ecommerceMenu.classList.remove("active");
-        }
-    });
-
-    // Ẩn submenu nếu nhấn ra ngoài
-    document.addEventListener("click", () => {
+      if (!ecommerceMenu.classList.contains("active")) {
         subMenuContainer.style.display = "none";
-        ecommerceMenu.classList.remove("active");
+        icon.style.transform = "rotate(0deg)";
+      }
     });
+  });
 
-    // Ngăn submenu bị ẩn khi click vào bên trong
-    subMenuContainer.addEventListener("click", (event) => {
-        event.stopPropagation();
-    });
-});
-
-}
 
 export default navigation;

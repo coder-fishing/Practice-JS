@@ -1,21 +1,21 @@
 let totalNotifications = 0;
-const subMenu = (subMenuName, notification) => {
+const subMenu = (subMenuName, notification ,link) => {
   if (notification > 0) {
     totalNotifications += notification;
     return `
-      <div class="subMenu">
+      <a class="subMenu" href="${link}">
         <p class="subMenu__name">${subMenuName}</p>
         <span class="subMenu__notification" notification="${notification}">
           <span class="subMenu__notification--number">${notification}</span>
         </span>
-      </div>
+      </a>
     `;
   }
 
   return `
-    <div class="subMenu">
+    <a class="subMenu" href="${link}">
       <p class="subMenu__name">${subMenuName}</p>
-    </div>
+    </a>
   `;
 };
 const getTotalNotifications = () => totalNotifications;

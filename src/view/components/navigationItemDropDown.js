@@ -5,8 +5,8 @@ const navigationItemDropDown = (
   number,
   icondown,
   icondownHover,
-  id 
-) => {
+  id  
+) => { 
   return `
         <li class="navigation-item" id="${id}">
             <div class="navigation-item__image-wrapper">
@@ -23,7 +23,7 @@ const navigationItemDropDown = (
                 <img class="navigation-item__down" src="${icondown}" alt="Dropdown icon">
                 <img class="navigation-item__down--hover" src="${icondownHover}" alt="Dropdown hover icon">
             </div>
-        </li>
+        </li> 
       `;
 };
 
