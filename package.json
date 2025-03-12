@@ -1,7 +1,6 @@
 {
   "scripts": {
     "start": "parcel src/index.html",
-    "posthtml": "posthtml src/index.html -o dist/index.html",
     "build": "parcel build src/index.html"
   },
   "alias": {
@@ -10,8 +9,6 @@
   "devDependencies": {
     "@parcel/transformer-sass": "^2.12.0",
     "parcel": "^2.12.0",
-    "posthtml": "^0.16.6",
-    "posthtml-include": "^2.0.1",
     "prettier": "^3.5.1"
   },
   "dependencies": {}

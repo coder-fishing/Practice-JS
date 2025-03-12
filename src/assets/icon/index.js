@@ -33,4 +33,6 @@ export {default as caretDown} from './fi-rr-caret-down.svg';
 export {default as caretLeft} from './fi-rr-caret-left.svg';
 export {default as minus} from './minus.svg';
 export {default as checkicon} from './checkIcon.svg';
+export {default as picture} from './fi-sr-picture.svg';
+export {default as cross} from './fi-sr-cross.svg'
 
