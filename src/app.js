@@ -8,8 +8,8 @@ import { DashboardView } from './view/pages/editProduct'
 import addProduct from './view/pages/addProduct.js'
 
 const routes = [
-    { path: '/product', ccontroller:ProductController,view:ProductListView },
-    { path:'/', controller:DashboardController , view:ProductListView  },
+    { path: '/product', controller:ProductController,view:ProductListView },
+    { path:'/', controller:DashboardController , view:DashboardView  },
     { path:'/category' , controller:CategoryController, view:categoriesList},
     { path: '/addproduct', controller:ProductController, view:addProduct}
 ]
