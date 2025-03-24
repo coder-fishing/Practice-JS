@@ -35,4 +35,5 @@ export {default as minus} from './minus.svg';
 export {default as checkicon} from './checkIcon.svg';
 export {default as picture} from './fi-sr-picture.svg';
 export {default as cross} from './fi-sr-cross.svg'
+export {default as save} from './save.svg'
 
