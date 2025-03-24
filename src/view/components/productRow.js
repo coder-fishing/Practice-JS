@@ -39,23 +39,22 @@ const ProductRow = ({ product }) => {
                         </div>
                   </div> 
           </td>
-
-
-
-          
+   
           <td class="product-table__item">
                 <div class="product-table__item--added">${product.added}</div>
           </td>
           <td class="product-table__item">
               <div class="product-table__item--buttons">
-                  <span class="product-table__edit">
-                       <img src="${pencil}"/> 
-                  </span>
+                  <a href="/editproduct/${product.id}">
+                        <span class="product-table__edit">
+                             <img src="${pencil}" alt="pencil"/> 
+                        </span>
+                  </a>
                   <span class="product-table__view">
-                        <img src="${eye}"/>
+                        <img src="${eye}" alt="eye"/>
                   </span>
                   <span class="product-table__delete">
-                        <img src="${trash}"/>
+                        <img src="${trash}" alt="trash"/>
                   </span> 
           </td> 
       </tr>

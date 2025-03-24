@@ -19,7 +19,11 @@ export class Router {
         this.loadRoute(path); 
     }
     loadRoute(path = location.pathname) {
-        const route = this.routes.find((r) => r.path === path);
+        const route = this.routes.find((r) => {
+            const routePath = r.path.replace(/:\w+/g, '([^/]+)');
+            const regex = new RegExp(`^${routePath}$`);
+            return regex.test(path);
+        });
         if (route) {
           document.querySelector("#app").innerHTML = Layout();
            new route.controller(new route.view());

@@ -1,12 +1,14 @@
+import axios from "axios";
 import productForm from "../components/productForm.js";
 import {caretRight, cross, add} from "./../../assets/icon";
+import { Product } from "./../../model/product.model.js";
 class addProduct {
     constructor() {
         this.render();
         this.dropdown('dropdown', 'dropdownButton', 'dropdownContent', 'status-text');
         this.dropdown('dropdowntop', 'dropdownButtonTop', 'dropdownContentTop');
-        this.addimage();
         this.hadleAddProduct();
+        this.addimage();
     }
 
     dropdown = (id, btn, content, text = null) => {
@@ -55,6 +57,7 @@ class addProduct {
 
         let currentImages = [];
 
+        console.log(filledState)
         // Ẩn filledState ban đầu
         filledState.style.display = 'none';
 
@@ -116,7 +119,7 @@ class addProduct {
         });
 
         const getProductData = () => { 
-            const images = Array.from(document.querySelectorAll(".preview-img"));                      
+            const images = Array.from(document.querySelectorAll(".preview-img"));                  
             return {
                 sku: document.querySelector('input[name="sku"]').value.trim(),
                 productName: document.querySelector('input[name="productName"]').value.trim(),
@@ -128,20 +131,42 @@ class addProduct {
                 price: document.querySelector('input[name="basePrice"]').value.trim(),
                 imageCount: document.querySelectorAll(".preview-img").length,
                 status: statusText.textContent.trim(),
-                category: selectedCategory 
+                category: selectedCategory ,
             };
         };
 
        
-        addProduct.addEventListener('click', () => {
-            const { sku, productName, ImageSrc, imageCount,price ,status,category} = getProductData();
-            console.log("SKU:", sku);
-            console.log("Product Name:", productName);
-            console.log("Image:",'firstimg', ImageSrc.firstImg , 'secondimg', ImageSrc.secondImg, 'thirdimg', ImageSrc.thirdImg);
-            console.log("Image Count:", imageCount);
-            console.log("Status:", status);
-            console.log("Price:", price);
-            console.log("Category:", category);
+        addProduct.addEventListener('click', async() => {
+            const bin=getProductData();
+            var item = new Product(
+                '',
+                bin.productName,
+                bin.sku,
+                bin.category,
+                bin.price,
+                bin.status,
+                new Date(),
+                '',
+                bin.ImageSrc.firstImg,
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            );
+            console.log(item)
+            alert("Product added successfully");
+            
+            try{
+                await axios.post(`https://67c09c48b9d02a9f224a690e.mockapi.io/api/product`, bin )
+                window.location.href = "/";
+                console.log("bin en")
+
+            }
+            catch(error){
+                console.error("Error adding product:", error);
+            }
         }); 
     }
 
@@ -180,7 +205,7 @@ class addProduct {
 
               </div>
             </div>
-         ${productForm()}`
+         ${productForm({ mode: 'create'})}`
         document.querySelector(".content").innerHTML = content;
     }
 }

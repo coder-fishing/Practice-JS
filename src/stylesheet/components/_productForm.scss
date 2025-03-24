@@ -196,9 +196,9 @@
             
                         // Gộp các thuộc tính chung
                         .draft,
-                        .publish,
-                        .out-of-stock, // Thay low-stock thành out-of-stock
-                        .stock { // Thêm .stock để đồng bộ với JS
+                        .published,
+                        .out-of-stock,
+                        .low-stock { 
                             display: flex;
                             padding: 0.25rem 0.625rem;
                             justify-content: center;
@@ -215,9 +215,13 @@
                             color: $neutralGray500;
                         }
             
-                        .publish {
+                        .published {
                             background-color: $secondaryGreen50;
                             color: $secondaryGreen500;
+                        }
+                        .low-stock { 
+                            background-color: $secondaryRed50;
+                            color: $secondaryRed500;
                         }
             
                         .out-of-stock {
@@ -225,10 +229,7 @@
                             color: $secondaryOrange500;
                         }
             
-                        .stock { 
-                            background-color: $secondaryRed50;
-                            color: $secondaryRed500;
-                        }
+                        
                     }
                 }
             }
