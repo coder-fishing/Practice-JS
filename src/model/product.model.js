@@ -8,7 +8,9 @@ export class Product {
     status,
     added,
     description,
-    photo,
+    firstImg,
+    secondImg,
+    thirdImg,
     discountType,
     discountValue,
     taxClass,
@@ -24,7 +26,11 @@ export class Product {
     this.status = status;
     this.added = added;
     this.description = description;
-    this.photo = photo;
+    this.ImageSrc = {
+      firstImg: firstImg,
+      secondImg: secondImg,
+      thirdImg: thirdImg
+    };
     this.discountType = discountType;
     this.discountValue = discountValue;
     this.taxClass = taxClass;

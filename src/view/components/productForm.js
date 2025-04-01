@@ -19,7 +19,7 @@ function productForm({ mode = 'create', productData = {} }) {
                 <h3 class="form-section__title">Media</h3>
                 <div class="form-section__field">  
                     <p class="form-section__field--name">Photo</p> 
-                    <div class="media__upload-area upload-empty" id="emptyState" >
+                    <div class="media__upload-area upload-empty" id="emptyState" style="display: ${mode === 'edit' && productData.ImageSrc?.firstImg ? 'none' : 'flex'}">
                         <figure class="media__upload-area--figure" id="productImageArea">
                             <img src="${picture}" alt="product-image" class="media__upload-area--img" id="productImage">
                         </figure>
@@ -28,22 +28,25 @@ function productForm({ mode = 'create', productData = {} }) {
                         <button class="media__upload-btn">Add Image</button>
                     </div>   
     
-                    <div class="media__upload-area upload-filled" id="filledState" >
+                    <div class="media__upload-area upload-filled" id="filledState" style="display: ${mode === 'edit' && productData.ImageSrc?.firstImg ? 'flex' : 'none'}">
                         <div class="media_upload-area list-image">
-                            <figure class="list-image-preview">
-                                <img src="" alt="product-image" class="preview-img" id="previewImg">
+                            <figure class="list-image-preview" style="display: ${productData.ImageSrc?.firstImg ? 'block' : 'none'}">
+                                <img src="${productData.ImageSrc?.firstImg || ''}" alt="product-image" class="preview-img" id="previewImg">
+                                <div class="delete-image" data-index="0">×</div>
                             </figure>
-                             <figure class="list-image-preview">
-                                <img src="" alt="product-image" class="preview-img">
+                            <figure class="list-image-preview" style="display: ${productData.ImageSrc?.secondImg && productData.ImageSrc?.secondImg.includes('cloudinary') ? 'block' : 'none'}">
+                                <img src="${productData.ImageSrc?.secondImg || ''}" alt="product-image" class="preview-img">
+                                <div class="delete-image" data-index="1">×</div>
                             </figure>
-                            <figure class="list-image-preview">
-                                <img src="" alt="product-image" class="preview-img">
+                            <figure class="list-image-preview" style="display: ${productData.ImageSrc?.thirdImg && productData.ImageSrc?.thirdImg.includes('cloudinary') ? 'block' : 'none'}">
+                                <img src="${productData.ImageSrc?.thirdImg || ''}" alt="product-image" class="preview-img">
+                                <div class="delete-image" data-index="2">×</div>
                             </figure>
                         </div> 
                         <p class="media__upload-text">Drag and drop image here, or click add image</p>
                         <input type="file" id="imageInputFilled" accept="image/*" style="display: none;">
-                        <button class="media__upload-btn" >Add Image</button>
-                    </div>             
+                        <button class="media__upload-btn">Add Image</button>
+                    </div>                 
                 </div>
             </div>          
     
@@ -105,7 +108,7 @@ function productForm({ mode = 'create', productData = {} }) {
                 </div>
                 <div class="dropdown" id="dropdowntop">
                     <div class="dropdown-group">
-                        <div class="dropbtn" id="dropdownButtonTop">${productData.category_id || 'None'}</div>
+                        <div class="dropbtn" id="dropdownButtonTop">${productData.category || 'None'}</div>
                         <img src="${caretDown}" alt="caret-down" class="caret-down"/>
                     </div>
                     <div class="dropdown-content" id="dropdownContentTop">

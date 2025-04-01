@@ -323,3 +323,43 @@
     }
 }
 
+.list-image-preview {
+    width: 6.25rem;
+    height: 6.25rem;
+    border-radius: 0.5rem;
+    background: #E0E2E7;
+    position: relative;
+
+    .preview-img {
+        width: 6.25rem;
+        height: 6.25rem;
+        object-fit: cover;
+        border-radius: 0.5rem;
+    }
+
+    .delete-image {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 20px;
+        height: 20px;
+        background: #FF4D4F;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: #FF7875;
+            transform: scale(1.1);
+        }
+    }
+}
+
