@@ -19,37 +19,24 @@ class ProductListView {
       const response = await axios.get("https://67c09c48b9d02a9f224a690e.mockapi.io/api/product");
       let products = response.data;
 
-      this.products = products.length
-        ? products
-        : Array.from({ length: 50 }, (_, i) => ({
-            id: i + 1,
-            name: `Product ${i + 1}`,
-            price: (i + 1) * 10,
-            status: i % 4 === 0
-              ? "Low Stock"
-              : i % 4 === 1
-              ? "Out of Stock"
-              : i % 4 === 2
-              ? "Draft"
-              : "Published"
-          }));
+      this.products = products
 
       this.maxPage = Math.ceil(this.products.length / this.itemsPerPage); 
       this.render(); 
     } catch (error) {
       console.error("Error fetching products:", error);
-      this.products = Array.from({ length: 50 }, (_, i) => ({
-        id: i + 1,
-        name: `Product ${i + 1}`,
-        price: (i + 1) * 10,
-        status: i % 4 === 0
-          ? "Low Stock"
-          : i % 4 === 1
-          ? "Out of Stock"
-          : i % 4 === 2
-          ? "Draft"
-          : "Published"
-      }));
+      // this.products = Array.from({ length: 50 }, (_, i) => ({
+      //   id: i + 1,
+      //   name: `Product ${i + 1}`,
+      //   price: (i + 1) * 10,
+      //   status: i % 4 === 0
+      //     ? "Low Stock"
+      //     : i % 4 === 1
+      //     ? "Out of Stock"
+      //     : i % 4 === 2
+      //     ? "Draft"
+      //     : "Published"
+      // }));
 
       this.maxPage = Math.ceil(this.products.length / this.itemsPerPage);
       this.render();

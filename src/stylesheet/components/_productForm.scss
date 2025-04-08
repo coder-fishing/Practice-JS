@@ -137,6 +137,9 @@
                     border-radius: 4px;
                     top: 100%;
                     left: 0;
+
+                    max-height: 282px;
+                    overflow: auto;
         
                     div {
                         color: #333;
