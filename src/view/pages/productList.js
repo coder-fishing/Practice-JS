@@ -10,6 +10,9 @@ class ProductListView {
       this.currentPage = 1;
       this.itemsPerPage = 6;
       this.maxPage = 1; 
+      this.currentFilter = 'all';
+      this.searchQuery = '';
+      this.searchTimeout = null; // For debouncing
   
       this.init();
     }
@@ -46,6 +49,7 @@ class ProductListView {
   async init() {
     document.addEventListener("DOMContentLoaded", async () => {
       await this.fetchProducts();
+      this.setupSearchEvent();
     });
   }
 
@@ -66,14 +70,48 @@ class ProductListView {
   }
 
   getPaginatedProducts() {
+    const filteredProducts = this.filterProducts(this.products);
+    
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
-    return this.products.slice(start, end);
+    return filteredProducts.slice(start, end);
+  }
+
+  filterProducts(products) {
+    let filteredProducts = products;
+    if (this.searchQuery) {
+      const query = this.searchQuery.toLowerCase();
+      filteredProducts = products.filter(product => {
+        const nameMatch = product.name && typeof product.name === 'string' && 
+                         product.name.toLowerCase().includes(query);       
+        const skuMatch = product.sku && typeof product.sku === 'string' && 
+                        product.sku.toLowerCase().includes(query);       
+        const categoryMatch = product.category && typeof product.category === 'string' && 
+                             product.category.toLowerCase().includes(query);        
+        return nameMatch || skuMatch || categoryMatch;
+      });
+    }
+    
+    switch (this.currentFilter) {
+      case 'all':
+        return filteredProducts;
+      case 'published':
+        return filteredProducts.filter(product => product.status === 'Published');
+      case 'low-stock':
+        return filteredProducts.filter(product => product.status === 'Out of Stock');
+      case 'draft':
+        return filteredProducts.filter(product => product.status === 'Draft');
+      default:
+        return filteredProducts;
+    }
   }
 
   renderPagination() {
     const pageNumbersContainer = document.getElementById("page-numbers");
     pageNumbersContainer.innerHTML = "";
+
+    const filteredProducts = this.filterProducts(this.products);
+    this.maxPage = Math.ceil(filteredProducts.length / this.itemsPerPage) || 1;
 
     let startPage = Math.max(1, this.currentPage - 2);
     let endPage = Math.min(this.maxPage, startPage + 4);
@@ -117,13 +155,29 @@ class ProductListView {
       tag.addEventListener('click', () => {
         tags.forEach(t => t.classList.remove('item-active'));
         tag.classList.toggle('item-active');
-        console.log('hehe');
+        
+        const tagText = tag.querySelector('.tag-add-searchbar__tag--item-element').textContent;
+        
+        if (tagText === 'All Products') {
+          this.currentFilter = 'all';
+        } else if (tagText === 'Published') {
+          this.currentFilter = 'published';
+        } else if (tagText === 'Low Stock') {
+          this.currentFilter = 'low-stock';
+        } else if (tagText === 'Draft') {
+          this.currentFilter = 'draft';
+        }
+        
+        this.currentPage = 1;
+        
+        this.renderTableOnly();
       });
     });
   };
   
   render() {
-    this.maxPage = Math.ceil(this.products.length / this.itemsPerPage) || 1;
+    const filteredProducts = this.filterProducts(this.products);
+    this.maxPage = Math.ceil(filteredProducts.length / this.itemsPerPage) || 1;
     const paginatedProducts = this.getPaginatedProducts();
 
     const bin = `
@@ -237,7 +291,7 @@ class ProductListView {
 
         <div class="pagination">
           <div class="pagination__showing">
-            Showing ${(this.currentPage - 1) * this.itemsPerPage + 1}-${Math.min(this.currentPage * this.itemsPerPage, this.products.length)} from ${this.products.length}
+            Showing ${(this.currentPage - 1) * this.itemsPerPage + 1}-${Math.min(this.currentPage * this.itemsPerPage, filteredProducts.length)} from ${filteredProducts.length}
           </div>
           <div class="pagination__button">
             <div class="pagination__button-caret-left" id="prevbtn">
@@ -257,6 +311,64 @@ class ProductListView {
     this.setupPaginationEvents();
     this.clickTable();
     this.clickTagItem();
+  }
+
+  setupSearchEvent() {
+    const searchInputs = document.querySelectorAll('.search-bar_input');
+    console.log(searchInputs);
+  
+    if (searchInputs.length === 2) {
+      const [searchInput1, searchInput2] = searchInputs;
+      
+      searchInput1.addEventListener('input', (e) => {
+        searchInput2.value = e.target.value;
+        
+        if (this.searchTimeout) {
+          clearTimeout(this.searchTimeout);
+        }
+  
+        this.searchTimeout = setTimeout(() => {
+          this.searchQuery = e.target.value;
+          this.currentPage = 1;
+          this.renderTableOnly();
+          console.log(this.searchQuery);
+        }, 300);
+      });
+      
+      // Second search input
+      searchInput2.addEventListener('input', (e) => {
+        // Update the first input to match the second
+        searchInput1.value = e.target.value;
+        
+        if (this.searchTimeout) {
+          clearTimeout(this.searchTimeout);
+        }
+  
+        this.searchTimeout = setTimeout(() => {
+          this.searchQuery = e.target.value;
+          this.currentPage = 1;
+          this.renderTableOnly();
+          console.log(this.searchQuery);
+        }, 300);
+      });
+    }
+  }
+
+  renderTableOnly() {
+    const filteredProducts = this.filterProducts(this.products);
+    this.maxPage = Math.ceil(filteredProducts.length / this.itemsPerPage) || 1;
+    const paginatedProducts = this.getPaginatedProducts();
+
+    // Update only the table body
+    const tableBody = document.querySelector('.product-table tbody');
+    if (tableBody) {
+      tableBody.innerHTML = paginatedProducts.map(product => ProductRow({ product })).join('');
+    }
+
+    // Update pagination
+    this.renderPagination();
+    this.setupPaginationEvents();
+    this.clickTable();
   }
 }
 
