@@ -2,6 +2,8 @@ import productForm from "../components/productForm.js";
 import { caretRight, cross, save } from "./../../assets/icon";
 import { dropdown } from '../../utils/dropdown.js';
 import ProductController from "../../controller/ProductController.js";
+import { showLoading, hideLoading } from "../../utils/loading.js";
+import { createToast } from "../../utils/toast.js";
 
 export class addProduct {
     constructor() {
@@ -11,6 +13,7 @@ export class addProduct {
 
     async loadCategories() {
         try {
+            showLoading();
             const categories = await this.controller.getCategories();
             const dropdownContent = document.getElementById('dropdownContentTop');
             const dropdownButton = document.getElementById('dropdownButtonTop');
@@ -22,8 +25,12 @@ export class addProduct {
                     ${category.name}</div>
                 `).join('');
             }
+            createToast('Categories loaded successfully', 'success');
         } catch (error) {
             console.error('Error loading categories:', error);
+            createToast('Failed to load categories', 'error');
+        } finally {
+            hideLoading();
         }
     }
 
@@ -43,12 +50,11 @@ export class addProduct {
 
         saveBtn.addEventListener("click", async () => {
             try {
+                showLoading();
                 const images = Array.from(document.querySelectorAll(".preview-img"));
                 const imageFiles = Array.from(document.querySelectorAll('input[type="file"]'))
                     .map(input => input.files[0])
                     .filter(file => file);
-
-                const imageUrls = await this.controller.processProductImages(images, imageFiles);
 
                 const formElements = {
                     images,
@@ -62,22 +68,27 @@ export class addProduct {
                 };
 
                 const productData = this.controller.getProductFormData(formElements);
-                productData.ImageSrc = imageUrls;
 
                 const validation = this.controller.validateProductData(productData, formElements);
                 if (!validation.isValid) {
-                    alert(Object.values(validation.errors)[0]);
+                    hideLoading(); // Hide loading when validation fails
+                    createToast(Object.values(validation.errors)[0], 'error');
                     return;
                 }
 
+                // Process images only after validation passes
+                const imageUrls = await this.controller.processProductImages(images, imageFiles);
+                productData.ImageSrc = imageUrls;
+
                 this.controller.setButtonLoading(saveBtn, true, 'Add Product');
                 await this.controller.saveProduct(productData);
-                alert("Product added successfully");
+                createToast('Product added successfully', 'success');
                 this.controller.redirect("/");
             } catch (error) {
                 console.error("Error adding product:", error);
-                alert("Error adding product. Please try again.");
+                createToast('Failed to add product', 'error');
             } finally {
+                hideLoading();
                 this.controller.setButtonLoading(saveBtn, false, 'Add Product');
             }
         });
@@ -139,9 +150,13 @@ export class addProduct {
 
             this.controller.setupImageHandling(imageElements);
             this.handleAddProduct();
+            createToast('Form loaded successfully', 'success');
         } catch (error) {
             console.error("Error in render:", error);
             document.querySelector(".content").innerHTML = "<p>Error loading form</p>";
+            createToast('Failed to load form', 'error');
+        } finally {
+            hideLoading();
         }
     };
 }

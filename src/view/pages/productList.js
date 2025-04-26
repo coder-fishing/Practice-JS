@@ -3,6 +3,9 @@ import searchBar from "./../components/searchBar";
 import ProductRow from "./../components/productRow";  
 import axios from "axios";
 import { setupPaginationEvents } from "../../utils/setupPaginationEvents.js";
+import { showLoading, hideLoading } from "../../utils/loading.js";
+import { createToast } from "../../utils/toast.js";
+import { showConfirmDialog } from '../components/confirmDialog.js';
 
 class ProductListView {
 
@@ -22,14 +25,17 @@ class ProductListView {
 
   async fetchProducts() {
     try {
+      showLoading();
       const response = await axios.get(`${this.API_URL}/product`);
       this.products = response.data;
       this.maxPage = Math.ceil(this.products.length / this.itemsPerPage); 
-      this.render(); 
+      this.render();
+      createToast('Products loaded successfully', 'success');
     } catch (error) {
       console.error("Error fetching products:", error);
-      this.maxPage = Math.ceil(this.products.length / this.itemsPerPage);
-      this.render();
+      createToast('Failed to load products', 'error');
+    } finally {
+      hideLoading();
     }
   }
 
@@ -70,21 +76,28 @@ class ProductListView {
   async handleBulkDelete() {
     if (this.selectedProducts.size === 0) return;
 
-    if (confirm(`Are you sure you want to delete ${this.selectedProducts.size} selected products?`)) {
-      try {
-        const deletePromises = Array.from(this.selectedProducts).map(id => 
-          axios.delete(`${this.API_URL}/product/${id}`)
-        );
-        await Promise.all(deletePromises);
-        this.products = this.products.filter(p => !this.selectedProducts.has(p.id));
-        this.selectedProducts.clear();
-        this.renderTableOnly();
-        alert('Selected products deleted successfully');
-      } catch (error) {
-        console.error('Error deleting products:', error);
-        alert('Failed to delete some products. Please try again.');
+    showConfirmDialog({
+      title: 'Delete Products',
+      message: `Are you sure you want to delete ${this.selectedProducts.size} selected products?`,
+      onConfirm: async () => {
+        try {
+          showLoading();
+          const deletePromises = Array.from(this.selectedProducts).map(id => 
+            axios.delete(`${this.API_URL}/product/${id}`)
+          );
+          await Promise.all(deletePromises);
+          this.products = this.products.filter(p => !this.selectedProducts.has(p.id));
+          this.selectedProducts.clear();
+          this.renderTableOnly();
+          createToast('Selected products deleted successfully', 'success');
+        } catch (error) {
+          console.error('Error deleting products:', error);
+          createToast('Failed to delete some products', 'error');
+        } finally {
+          hideLoading();
+        }
       }
-    }
+    });
   }
 
   setupDeleteHandlers() {
@@ -97,17 +110,24 @@ class ProductListView {
         if (this.selectedProducts.size > 0) {
           this.handleBulkDelete();
         } else if (productId) {
-          if (confirm('Are you sure you want to delete this product?')) {
-            try {
-              await axios.delete(`${this.API_URL}/product/${productId}`);
-              this.products = this.products.filter(p => p.id !== productId);
-              this.renderTableOnly();
-              alert('Product deleted successfully');
-            } catch (error) {
-              console.error('Error deleting product:', error);
-              alert('Failed to delete product. Please try again.');
+          showConfirmDialog({
+            title: 'Delete Product',
+            message: 'Are you sure you want to delete this product?',
+            onConfirm: async () => {
+              try {
+                showLoading();
+                await axios.delete(`${this.API_URL}/product/${productId}`);
+                this.products = this.products.filter(p => p.id !== productId);
+                this.renderTableOnly();
+                createToast('Product deleted successfully', 'success');
+              } catch (error) {
+                console.error('Error deleting product:', error);
+                createToast('Failed to delete product', 'error');
+              } finally {
+                hideLoading();
+              }
             }
-          }
+          });
         }
       }
     });

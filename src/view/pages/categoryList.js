@@ -2,6 +2,8 @@ import { caretRight, download, add, caretLeft, checkbox, minus, caretDown } from
 import CategoryRow from "./../components/categoryRow";  
 import axios from "axios";
 import { setupPaginationEvents } from "../../utils/setupPaginationEvents.js";
+import { showLoading, hideLoading } from "../../utils/loading.js";
+import { createToast } from "../../utils/toast.js";
 
 class CategoryListView {
     constructor() {
@@ -17,12 +19,17 @@ class CategoryListView {
 
     async fetchCategories() {
         try {
+            showLoading();
             const response = await axios.get(`${this.API_URL}/cate`);
             this.categories = response.data;
             this.maxPage = Math.ceil(this.categories.length / this.itemsPerPage);
             this.render();
+            createToast('Categories loaded successfully', 'success');
         } catch (error) {
             console.error('Error fetching categories:', error);
+            createToast('Failed to load categories', 'error');
+        } finally {
+            hideLoading();
         }
     }
 
@@ -64,6 +71,7 @@ class CategoryListView {
 
         if (confirm(`Are you sure you want to delete ${this.selectedCategories.size} selected categories?`)) {
             try {
+                showLoading();
                 const deletePromises = Array.from(this.selectedCategories).map(id => 
                     axios.delete(`${this.API_URL}/cate/${id}`)
                 );
@@ -71,10 +79,12 @@ class CategoryListView {
                 this.categories = this.categories.filter(c => !this.selectedCategories.has(c.categoryID));
                 this.selectedCategories.clear();
                 this.renderTableOnly();
-                alert('Selected categories deleted successfully');
+                createToast('Selected categories deleted successfully', 'success');
             } catch (error) {
                 console.error('Error deleting categories:', error);
-                alert('Failed to delete some categories. Please try again.');
+                createToast('Failed to delete some categories', 'error');
+            } finally {
+                hideLoading();
             }
         }
     }
@@ -91,13 +101,16 @@ class CategoryListView {
                 } else if (categoryId) {
                     if (confirm('Are you sure you want to delete this category?')) {
                         try {
+                            showLoading();
                             await axios.delete(`${this.API_URL}/cate/${categoryId}`);
                             this.categories = this.categories.filter(c => c.categoryID !== categoryId);
                             this.renderTableOnly();
-                            alert('Category deleted successfully');
+                            createToast('Category deleted successfully', 'success');
                         } catch (error) {
                             console.error('Error deleting category:', error);
-                            alert('Failed to delete category. Please try again.');
+                            createToast('Failed to delete category', 'error');
+                        } finally {
+                            hideLoading();
                         }
                     }
                 }

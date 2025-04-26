@@ -2,6 +2,8 @@ import productForm from "../components/productForm.js";
 import { caretRight, cross, save } from "./../../assets/icon";
 import { dropdown } from '../../utils/dropdown.js';
 import ProductController from "../../controller/ProductController.js";
+import { showLoading, hideLoading } from "../../utils/loading.js";
+import { createToast } from "../../utils/toast.js";
 
 export class editProduct {
     constructor() {
@@ -13,6 +15,7 @@ export class editProduct {
 
     async loadCategories() {
         try {
+            showLoading();
             const categories = await this.controller.getCategories();
             const dropdownContent = document.getElementById('dropdownContentTop');
             const dropdownButton = document.getElementById('dropdownButtonTop');
@@ -30,12 +33,15 @@ export class editProduct {
                     if (selectedCategory && dropdownButton) {
                         dropdownButton.textContent = selectedCategory.name;
                         dropdownButton.setAttribute('data-selected-id', selectedCategory.categoryID);
-                        console.log("Selected category:", selectedCategory);
                     }
                 }
             }
+            createToast('Categories loaded successfully', 'success');
         } catch (error) {
             console.error('Error loading categories:', error);
+            createToast('Failed to load categories', 'error');
+        } finally {
+            hideLoading();
         }
     }
 
@@ -56,6 +62,7 @@ export class editProduct {
 
         saveBtn.addEventListener("click", async () => {
             try {
+                showLoading();
                 const images = Array.from(document.querySelectorAll(".preview-img"));
                 const imageFiles = Array.from(document.querySelectorAll('input[type="file"]'))
                     .map(input => input.files[0])
@@ -79,18 +86,19 @@ export class editProduct {
 
                 const validation = this.controller.validateProductData(productData);
                 if (!validation.isValid) {
-                    alert(Object.values(validation.errors)[0]);
+                    createToast(Object.values(validation.errors)[0], 'error');
                     return;
                 }
 
                 this.controller.setButtonLoading(saveBtn, true, 'Save product');
                 await this.controller.updateProduct(this.productId, productData);
-                alert("Product updated successfully");
+                createToast('Product updated successfully', 'success');
                 this.controller.redirect("/");
             } catch (error) {
                 console.error("Error updating product:", error);
-                alert("Error updating product. Please try again.");
+                createToast('Failed to update product', 'error');
             } finally {
+                hideLoading();
                 this.controller.setButtonLoading(saveBtn, false, 'Save product');
             }
         });
@@ -102,16 +110,17 @@ export class editProduct {
 
     render = async () => {
         try {
+            showLoading();
             this.currentProduct = await this.controller.getProductById(this.productId);
             
             if (!this.currentProduct) {
                 document.querySelector(".content").innerHTML = "<p>Error loading product</p>";
+                createToast('Product not found', 'error');
                 return;
             }
 
             this.currentProduct.div = this.currentProduct.status.toLowerCase().replace(/\s+/g, '-');
-            console.log("Current product:", this.currentProduct);
-           
+            
             const content = `
             <div class="product-list">
                 <div class="product-title">
@@ -162,9 +171,13 @@ export class editProduct {
 
             this.controller.setupImageHandling(imageElements);
             this.handleEditProduct(this.currentProduct);
+            createToast('Product loaded successfully', 'success');
         } catch (error) {
             console.error("Error in render:", error);
             document.querySelector(".content").innerHTML = "<p>Error loading product</p>";
+            createToast('Failed to load product', 'error');
+        } finally {
+            hideLoading();
         }
     };
 }
