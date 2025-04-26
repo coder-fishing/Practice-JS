@@ -24,7 +24,7 @@ function categoryForm(props = { mode: 'create', categoryData: {} }) {
                 </div>     
  
                 <div class="thumbnail__preview" id="previewState" style="display: ${mode === 'edit' && categoryData.image ? 'block' : 'none'}">
-                    <img src="${categoryData.image || ''}" alt="category thumbnail"/>
+                    <img id="previewImage" src="${categoryData.image || ''}" alt="category thumbnail"/>
                     <div class="thumbnail__preview-remove">×</div>
                 </div>  
             </div>   
@@ -37,23 +37,21 @@ function categoryForm(props = { mode: 'create', categoryData: {} }) {
                         <label class="form-field__label">Category Name</label>
                         <input 
                             type="text" 
-                        class="form-field__input" 
-                        placeholder="Type category name here..." 
-                        name="categoryName" 
-                        value="${categoryData.name || ''}"
-                        >
-                    </div>  
-
+                            class="form-field__input" 
+                            placeholder="Type category name here..." 
+                            name="categoryName" 
+                            value="${categoryData.name || ''}"
+                        />
+                    </div>
                     <div class="form-field">
                         <label class="form-field__label">Description</label>
                         <textarea 
                             class="form-field__textarea" 
-                            placeholder="Type category description here..." 
+                            placeholder="Type description here..." 
                             name="description"
                         >${categoryData.description || ''}</textarea>
                     </div>
                 </div>
-                
             </div>
         </div>
     `);

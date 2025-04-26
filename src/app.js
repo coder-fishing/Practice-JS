@@ -10,7 +10,7 @@ import addCategories from './view/pages/addCategories.js'
 import editCategory from './view/pages/editCategories.js'
 
 const routes = [
-    { path: '/product', ccontroller:ProductController,view:ProductListView },
+    { path: '/product', controller:ProductController,view:ProductListView },
     { path:'/', controller:DashboardController , view:ProductListView  },
     { path:'/editproduct/:id', controller:ProductController , view:editProduct  },
     { path:'/category' , controller:CategoryController, view:CategoryListView},

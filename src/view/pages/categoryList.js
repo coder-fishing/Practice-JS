@@ -1,6 +1,7 @@
 import { caretRight, download, add, caretLeft, checkbox, minus, caretDown } from "./../../assets/icon";
 import CategoryRow from "./../components/categoryRow";  
 import axios from "axios";
+import { setupPaginationEvents } from "../../utils/setupPaginationEvents.js";
 
 class CategoryListView {
     constructor() {
@@ -26,22 +27,6 @@ class CategoryListView {
     }
 
     
-
-    setupPaginationEvents() {
-        document.querySelector("#prevbtn")?.addEventListener("click", () => {
-            if (this.currentPage > 1) {
-                this.currentPage--;
-                this.render();
-            }
-        });
-
-        document.querySelector("#nextbtn")?.addEventListener("click", () => {
-            if (this.currentPage < this.maxPage) {
-                this.currentPage++;
-                this.render();
-            }
-        });
-    }
 
     getPaginatedCategories() {
         const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -202,7 +187,7 @@ class CategoryListView {
 
         document.querySelector("#content").innerHTML = bin;
         this.renderPagination();
-        this.setupPaginationEvents();
+        setupPaginationEvents();
         this.clickTable();
         this.clickTagItem();
     }

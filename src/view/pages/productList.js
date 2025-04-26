@@ -2,6 +2,7 @@ import { caretRight, download, add, caretLeft, checkbox, minus, caretDown } from
 import searchBar from "./../components/searchBar";
 import ProductRow from "./../components/productRow";  
 import axios from "axios";
+import { setupPaginationEvents } from "../../utils/setupPaginationEvents.js";
 
 class ProductListView {
 
@@ -53,21 +54,6 @@ class ProductListView {
     });
   }
 
-  setupPaginationEvents() {
-    document.querySelector("#prevbtn").addEventListener("click", () => {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-        this.render();
-      } 
-    });
-
-    document.querySelector("#nextbtn").addEventListener("click", () => {
-      if (this.currentPage < this.maxPage) {
-        this.currentPage++;
-        this.render();
-      }
-    });
-  }
 
   getPaginatedProducts() {
     const filteredProducts = this.filterProducts(this.products);
@@ -308,7 +294,7 @@ class ProductListView {
 
     document.querySelector("#content").innerHTML = bin;
     this.renderPagination(); 
-    this.setupPaginationEvents();
+    setupPaginationEvents();
     this.clickTable();
     this.clickTagItem();
   }
@@ -367,7 +353,7 @@ class ProductListView {
 
     // Update pagination
     this.renderPagination();
-    this.setupPaginationEvents();
+    setupPaginationEvents();
     this.clickTable();
   }
 }
