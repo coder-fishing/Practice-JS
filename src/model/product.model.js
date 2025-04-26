@@ -4,6 +4,7 @@ export class Product {
     name,
     sku,
     category,
+    category_ID,
     price,
     status,
     added,
@@ -22,6 +23,7 @@ export class Product {
     this.name = name;
     this.sku = sku;
     this.category = category;
+    this.category_ID = category_ID;   
     this.price = price;
     this.status = status;
     this.added = added;
