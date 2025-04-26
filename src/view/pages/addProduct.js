@@ -2,13 +2,19 @@ import axios from "axios";
 import productForm from "../components/productForm.js";
 import {caretRight, cross, add} from "./../../assets/icon";
 import { Product } from "./../../model/product.model.js";
+
+// Cloudinary configuration
+const cloudName = 'dzivajta9';
+const uploadPreset = 'Practicejs_image';
+const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
 class addProduct {
     constructor() {
         this.render();
         this.dropdown('dropdown', 'dropdownButton', 'dropdownContent', 'status-text');
         this.dropdown('dropdowntop', 'dropdownButtonTop', 'dropdownContentTop');
         this.hadleAddProduct();
-        this.addimage();
+        this.addimage();    
     }
 
     dropdown = (id, btn, content, text = null) => {
@@ -40,11 +46,13 @@ class addProduct {
         });
 
         document.addEventListener('click', (e) => {
-            if (!dropdown==(e.target)) {
+            if (!dropdown.contains(e.target)) {
                 dropdownContent.style.display = 'none';
             }
         });
     }
+
+    
 
     addimage = () => {        
         const emptyState = document.getElementById('emptyState');
@@ -56,47 +64,104 @@ class addProduct {
         const frames = document.querySelectorAll('.list-image-preview');
 
         let currentImages = [];
-
-        console.log(filledState)
-        // Ẩn filledState ban đầu
         filledState.style.display = 'none';
 
-        // Gán sự kiện cho nút "Add Image"
         if (btns.length > 1) {
             btns[0].addEventListener('click', () => imageInputEmpty.click());
             btns[1].addEventListener('click', () => imageInputFilled.click());
         }
 
-        function handleImageUpload(event, hideState, showState) {
+        // Hàm upload ảnh lên Cloudinary
+        const uploadToCloudinary = async (file) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+
+            try {
+                const response = await axios.post(uploadUrl, formData);
+                return response.data.secure_url; // Trả về URL của ảnh đã upload
+            } catch (error) {
+                console.error('Error uploading to Cloudinary:', error);
+                throw new Error('Failed to upload image');
+            }
+        };
+
+        async function handleImageUpload(event) {
             const files = event.target.files;
             
             if (files.length > 0) {
-                const newFiles = Array.from(files);
-                currentImages = [...currentImages, ...newFiles];
-
-                emptyState.style.display = 'none';
-                filledState.style.display = 'flex';
-
-                previewImages.forEach((img, index) => {
-                    if (index < currentImages.length) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            frames[index].style.display = 'block';
-                            img.src = e.target.result;
-                        };
-                        reader.readAsDataURL(currentImages[index]);
+                try {
+                    const newFiles = Array.from(files);
+                    
+                    // Giới hạn số lượng ảnh
+                    if (currentImages.length + newFiles.length > 3) {
+                        alert('Maximum 3 images allowed');
+                        return;
                     }
-                });
+
+                    // Upload từng ảnh lên Cloudinary
+                    for (const file of newFiles) {
+                        // Kiểm tra định dạng file
+                        if (!file.type.startsWith('image/')) {
+                            alert('Please upload only image files');
+                            continue;
+                        }
+                        
+                        try {
+                            const imageUrl = await uploadToCloudinary(file);
+                            currentImages.push(imageUrl);
+                        } catch (error) {
+                            alert('Error uploading image. Please try again.');
+                            console.error('Upload error:', error);
+                            continue;
+                        }
+                    }
+
+                    // Cập nhật giao diện
+                    emptyState.style.display = 'none';
+                    filledState.style.display = 'flex';
+
+                    previewImages.forEach((img, index) => {
+                        if (index < currentImages.length) {
+                            frames[index].style.display = 'block';
+                            img.src = currentImages[index];
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error handling images:', error);
+                    alert('Error uploading images. Please try again.');
+                }
             }
         }
 
-        imageInputEmpty.addEventListener('change', (event) => handleImageUpload(event, 'emptyState', 'filledState'));
-        imageInputFilled.addEventListener('change', (event) => handleImageUpload(event, 'emptyState', 'filledState'));
+        const deleteButtons = document.querySelectorAll('.delete-image');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = parseInt(e.target.getAttribute('data-index'));
+                const frame = frames[index];
+                const img = previewImages[index];
+                
+                // Xóa ảnh
+                img.src = '';
+                frame.style.display = 'none';
+                
+                // Kiểm tra xem còn ảnh nào không
+                const remainingImages = Array.from(previewImages).filter(img => img.src && img.src !== '');
+                if (remainingImages.length === 0) {
+                    filledState.style.display = 'none';
+                    emptyState.style.display = 'flex';
+                }
+            });
+        });
+
+        imageInputEmpty.addEventListener('change', handleImageUpload);
+        imageInputFilled.addEventListener('change', handleImageUpload);
     }
  
     hadleAddProduct = () => {
         const dropdownContent = document.getElementById('dropdownContent');
-        const statusText =document.getElementById('status-text')
+        const statusText = document.getElementById('status-text');
+        const dropdownButton = document.getElementById('dropdownButton');
         const items = dropdownContent.querySelectorAll('div');
         const addProduct = document.querySelector('#addProduct');
         
@@ -109,63 +174,94 @@ class addProduct {
 
         let selectedCategory = "None";
 
-        // Lắng nghe sự kiện click để cập nhật giá trị category
         document.getElementById("dropdownContentTop").addEventListener("click", (event) => {
             const selectedValue = event.target.getAttribute("data-value"); 
             if (selectedValue) {
-                selectedCategory = selectedValue; // Cập nhật giá trị
-                document.getElementById("dropdownButtonTop").textContent = selectedCategory; // Cập nhật UI
+                selectedCategory = selectedValue;
+                document.getElementById("dropdownButtonTop").textContent = selectedCategory;
             }
         });
 
         const getProductData = () => { 
             const images = Array.from(document.querySelectorAll(".preview-img"));                  
             return {
+                name: document.querySelector('input[name="productName"]').value.trim(),
                 sku: document.querySelector('input[name="sku"]').value.trim(),
-                productName: document.querySelector('input[name="productName"]').value.trim(),
-                ImageSrc: {
-                        firstImg: images.length > 0 ? images[0].src : null,
-                        secondImg: images.length > 1 ? images[1].src : null,
-                        thirdImg: images.length > 2 ? images[2].src : null,
-                    },
+                category: selectedCategory,
                 price: document.querySelector('input[name="basePrice"]').value.trim(),
-                imageCount: document.querySelectorAll(".preview-img").length,
                 status: statusText.textContent.trim(),
-                category: selectedCategory ,
+                added: new Date().toISOString(),
+                description: document.querySelector('textarea[name="description"]')?.value.trim() || '',
+                stock: document.querySelector('input[name="quantity"]')?.value.trim() || '0',
+                ImageSrc: {
+                    firstImg: images.length > 0 ? images[0].src : null,
+                    secondImg: images.length > 1 ? images[1].src : null,
+                    thirdImg: images.length > 2 ? images[2].src : null,
+                }
             };
         };
 
+        const validateProductData = (data) => {
+            if (!data.name.trim()) {
+                alert("Product name is required");
+                return false;
+            }
+            if (!data.sku.trim()) {
+                alert("SKU is required");
+                return false;
+            }
+            if (!data.category || data.category === "None") {
+                alert("Category is required");
+                return false;
+            }
+            if (!data.price || isNaN(data.price) || data.price <= 0) {
+                alert("Valid price is required");
+                return false;
+            }
+            if (!data.stock || isNaN(data.stock) || data.stock < 0) {
+                alert("Valid stock quantity is required");
+                return false;
+            }
+            return true;
+        };
        
         addProduct.addEventListener('click', async() => {
-            const bin=getProductData();
+            const bin = getProductData();
+            
+            if (!validateProductData(bin)) {
+                return;
+            }
+
             var item = new Product(
-                '',
-                bin.productName,
+                '', // id
+                bin.name,
                 bin.sku,
                 bin.category,
                 bin.price,
                 bin.status,
-                new Date(),
-                '',
+                bin.added,
+                bin.description,
                 bin.ImageSrc.firstImg,
-                '',
-                '',
-                '',
-                '',
-                '',
-                ''
+                bin.ImageSrc.secondImg,
+                bin.ImageSrc.thirdImg,
+                '', // discountType
+                '', // discountValue
+                '', // taxClass
+                '', // vatAmount
+                '', // barcode
+                bin.stock
             );
-            console.log(item)
-            alert("Product added successfully");
-            
-            try{
-                await axios.post(`https://67c09c48b9d02a9f224a690e.mockapi.io/api/product`, bin )
-                window.location.href = "/";
-                console.log("bin en")
 
-            }
-            catch(error){
+            console.log("Product data being sent:", item);
+            
+            try {
+                const response = await axios.post(`https://67c09c48b9d02a9f224a690e.mockapi.io/api/product`, item);
+                console.log("Server response:", response.data);
+                alert("Product added successfully");
+                window.location.href = "/";
+            } catch(error) {
                 console.error("Error adding product:", error);
+                alert("Error adding product. Please try again.");
             }
         }); 
     }
@@ -202,7 +298,6 @@ class addProduct {
                     </figure>
                     <span class="button__text">Add product</span>
                 </button>
-
               </div>
             </div>
          ${productForm({ mode: 'create'})}`
