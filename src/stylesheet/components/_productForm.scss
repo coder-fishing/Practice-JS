@@ -246,6 +246,12 @@
             }
         }
     }
+    .field_container{
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        align-self: stretch;
+    }
 
     .media__upload{
         &-text{
