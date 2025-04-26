@@ -40,8 +40,6 @@ export const formatters = {
                 hour: '2-digit',
                 minute: '2-digit'
             }).format(date);
-        } catch {
-            return 'undefined';
-        }
-    }
+
 }; 
+
