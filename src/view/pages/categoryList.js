@@ -9,16 +9,16 @@ class CategoryListView {
         this.itemsPerPage = 8;
         this.currentPage = 1;
         this.searchQuery = '';
+        this.API_URL = 'https://67c09c48b9d02a9f224a690e.mockapi.io/api';
+        this.selectedCategories = new Set();
         this.render();
-
         this.init();
     }
 
     async fetchCategories() {
         try {
-            const response = await axios.get('https://67c09c48b9d02a9f224a690e.mockapi.io/api/cate');
+            const response = await axios.get(`${this.API_URL}/cate`);
             this.categories = response.data;
-
             this.maxPage = Math.ceil(this.categories.length / this.itemsPerPage);
             this.render();
         } catch (error) {
@@ -26,7 +26,84 @@ class CategoryListView {
         }
     }
 
-    
+    async init() {
+        await this.fetchCategories();
+        this.setupDeleteHandlers();
+        this.setupBulkActions();
+    }
+
+    setupBulkActions() {
+        document.addEventListener('click', (e) => {
+            const headerCheckbox = e.target.closest('.product-table-header__imageleft--first');
+            if (headerCheckbox) {
+                const allCheckboxes = document.querySelectorAll('.product-table__name__checkbox--check');
+                const allRows = document.querySelectorAll('.product-table__row');
+                
+                const isHeaderChecked = headerCheckbox.classList.contains('checked');
+                headerCheckbox.classList.toggle('checked');
+                
+                allCheckboxes.forEach((checkbox, index) => {
+                    if (!isHeaderChecked) {
+                        checkbox.classList.add('checkactive');
+                        allRows[index].classList.add('rowactive');
+                        const categoryId = allRows[index].getAttribute('data-id');
+                        if (categoryId) this.selectedCategories.add(categoryId);
+                    } else {
+                        checkbox.classList.remove('checkactive');
+                        allRows[index].classList.remove('rowactive');
+                        const categoryId = allRows[index].getAttribute('data-id');
+                        if (categoryId) this.selectedCategories.delete(categoryId);
+                    }
+                });
+            }
+        });
+    }
+
+    async handleBulkDelete() {
+        if (this.selectedCategories.size === 0) return;
+
+        if (confirm(`Are you sure you want to delete ${this.selectedCategories.size} selected categories?`)) {
+            try {
+                const deletePromises = Array.from(this.selectedCategories).map(id => 
+                    axios.delete(`${this.API_URL}/cate/${id}`)
+                );
+                await Promise.all(deletePromises);
+                this.categories = this.categories.filter(c => !this.selectedCategories.has(c.categoryID));
+                this.selectedCategories.clear();
+                this.renderTableOnly();
+                alert('Selected categories deleted successfully');
+            } catch (error) {
+                console.error('Error deleting categories:', error);
+                alert('Failed to delete some categories. Please try again.');
+            }
+        }
+    }
+
+    setupDeleteHandlers() {
+        document.addEventListener('click', async (e) => {
+            const deleteButton = e.target.closest('.product-table__delete');
+            if (deleteButton) {
+                const row = deleteButton.closest('tr');
+                const categoryId = row.getAttribute('data-id');
+                
+                if (this.selectedCategories.size > 0) {
+                    this.handleBulkDelete();
+                } else if (categoryId) {
+                    if (confirm('Are you sure you want to delete this category?')) {
+                        try {
+                            await axios.delete(`${this.API_URL}/cate/${categoryId}`);
+                            this.categories = this.categories.filter(c => c.categoryID !== categoryId);
+                            this.renderTableOnly();
+                            alert('Category deleted successfully');
+                        } catch (error) {
+                            console.error('Error deleting category:', error);
+                            alert('Failed to delete category. Please try again.');
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     getPaginatedCategories() {
         const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -64,13 +141,22 @@ class CategoryListView {
     }
 
     clickTable = () => {
-        const cliks = document.querySelectorAll('.product-table__name__checkbox--check');
-        const checks = document.querySelectorAll(".product-table__row");
+        const checkboxes = document.querySelectorAll('.product-table__name__checkbox--check');
+        const rows = document.querySelectorAll(".product-table__row");
 
-        cliks.forEach((clik, index) => {
-            clik.addEventListener('click', () => {
-                clik.classList.toggle('checkactive');
-                checks[index].classList.toggle('rowactive');
+        checkboxes.forEach((checkbox, index) => {
+            checkbox.addEventListener('click', () => {
+                checkbox.classList.toggle('checkactive');
+                rows[index].classList.toggle('rowactive');
+                
+                const categoryId = rows[index].getAttribute('data-id');
+                if (categoryId) {
+                    if (checkbox.classList.contains('checkactive')) {
+                        this.selectedCategories.add(categoryId);
+                    } else {
+                        this.selectedCategories.delete(categoryId);
+                    }
+                }
             });
         });
     }
@@ -85,16 +171,20 @@ class CategoryListView {
         });
     }
 
-    async init() {
-        document.addEventListener("DOMContentLoaded", async () => {
-          await this.fetchCategories();
-        });
-      }
+    renderTableOnly() {
+        const paginatedCategories = this.getPaginatedCategories();
+        const tableBody = document.querySelector('.product-table tbody');
+        if (tableBody) {
+            tableBody.innerHTML = paginatedCategories.map(category => CategoryRow({ category })).join('');
+            this.clickTable();
+        }
+        this.renderPagination();
+    }
 
     render() {
         const paginatedCategories = this.getPaginatedCategories();
 
-        const bin = `
+        const content = `
             <div class="product-list">
                 <div class="product-title">
                     <div class="product-title-left">
@@ -130,7 +220,7 @@ class CategoryListView {
                                     <div class="product-table-header__image">
                                         <div class="product-table-header__imageleft">
                                             <img class="product-table-header__imageleft--first" src="${checkbox}" alt="checkbox"/>
-                                            <img class="product-table-header__imageleft--second" src="${minus}" alt="tick/">
+                                            <img class="product-table-header__imageleft--second" src="${minus}" alt="tick"/>
                                         </div>
                                         <p class="product-table-header__name translate">Category</p>  
                                     </div> 
@@ -142,7 +232,6 @@ class CategoryListView {
                                     <p class="product-table-header__name">Sold</p>
                                     <img src="${caretDown}" alt="arrow Down" class="product-title__icon" />
                                 </div> 
-                                
                             </th>
                             <th class="product-table-header">   
                                 <div class="product-table-header__wrapper two">
@@ -185,7 +274,7 @@ class CategoryListView {
             </div>
         `;
 
-        document.querySelector("#content").innerHTML = bin;
+        document.querySelector("#content").innerHTML = content;
         this.renderPagination();
         setupPaginationEvents();
         this.clickTable();
