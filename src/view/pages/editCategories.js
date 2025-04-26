@@ -2,6 +2,8 @@ import categoryForm from "../components/categoryForm";
 import { caretRight, cross, save } from "./../../assets/icon";
 import { Category } from "../../model/category.model";
 import CategoryController from "../../controller/CategoryController";
+import { showLoading, hideLoading } from "../../utils/loading.js";
+import { createToast } from "../../utils/toast.js";
 
 export default class editCategory {
     constructor() {
@@ -52,6 +54,7 @@ export default class editCategory {
     
         if (!nameInput || !descriptionInput) {
             console.error('One or more form elements not found');
+            createToast('Form elements not found', 'error');
             return;
         }
     
@@ -64,13 +67,14 @@ export default class editCategory {
     
         const validation = this.controller.validateFormData(formData);
         if (!validation.isValid) {
-            alert(Object.values(validation.errors)[0]);
+            createToast(Object.values(validation.errors)[0], 'error');
             return;
         }
 
-        this.controller.setButtonLoading(submitButton, true, 'Save Category');
-    
         try {
+            showLoading();
+            this.controller.setButtonLoading(submitButton, true, 'Save Category');
+    
             let imageUrl = this.currentCategory.image; // Keep existing image by default
             
             // Only upload new image if a file was selected
@@ -81,22 +85,25 @@ export default class editCategory {
             const categoryData = new Category(formData.name, formData.description, imageUrl);
             await this.controller.updateCategory(this.categoryId, categoryData);
             
-            alert('Category updated successfully!');
+            createToast('Category updated successfully!', 'success');
             this.controller.redirect('/category');
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to update category. Please try again.');
+            createToast('Failed to update category', 'error');
         } finally {
+            hideLoading();
             this.controller.setButtonLoading(submitButton, false, 'Save Category');
         }
     }
 
     render = async () => {
         try {
+            showLoading();
             this.currentCategory = await this.controller.getCategoryById(this.categoryId);
             
             if (!this.currentCategory) {
                 document.querySelector(".content").innerHTML = "<p>Error loading category</p>";
+                createToast('Category not found', 'error');
                 return;
             }
             
@@ -129,9 +136,13 @@ export default class editCategory {
             `;
             
             document.querySelector(".content").innerHTML = content;
+            createToast('Category loaded successfully', 'success');
         } catch (error) {
             console.error("Error in render:", error);
             document.querySelector(".content").innerHTML = "<p>Error loading category</p>";
+            createToast('Failed to load category', 'error');
+        } finally {
+            hideLoading();
         }
     }
 }

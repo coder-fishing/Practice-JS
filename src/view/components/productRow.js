@@ -3,7 +3,7 @@ import { formatters } from "../../utils/formatters.js";
 
 const ProductRow = ({ product }) => {
   return (`
-      <tr class="product-table__row">
+      <tr class="product-table__row" data-id="${product.id}">
           <td class="product-table__item"> 
             <div class="product-table__name">
                 <div class="product-table__name__checkbox">
@@ -55,7 +55,7 @@ const ProductRow = ({ product }) => {
                   <span class="product-table__view">
                         <img src="${eye}" alt="eye"/>
                   </span>
-                  <span class="product-table__delete">
+                  <span class="product-table__delete" data-id="${product.id}">
                         <img src="${trash}" alt="trash"/>
                   </span> 
               </div>

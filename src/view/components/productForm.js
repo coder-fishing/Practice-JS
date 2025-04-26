@@ -86,17 +86,19 @@ function productForm({ mode = 'create', productData = {} }) {
     
             <div class="form-section form-section--inventory">
                 <h3 class="form-section__title">Inventory</h3>
-                <div class="form-section__field">
-                    <p class="form-section__field--name">SKU</p>
-                    <input class="form-section__field--input" type="text" placeholder="Type product SKU here..." name="sku" value="${productData.sku || ''}">
-                </div>
-                <div class="form-section__field">
-                    <p class="form-section__field--name">Barcode</p>
-                    <input class="form-section__field--input" type="text" placeholder="Product barcode..." name="barcode" value="${productData.barcode || ''}">
-                </div>
-                <div class="form-section__field">
-                    <p class="form-section__field--name">Quantity</p>
-                    <input class="form-section__field--input" type="text" placeholder="Type product quantity here..." name="quantity" value="${productData.quantity || ''}">
+                <div class="field_container">
+                    <div class="form-section__field">
+                        <p class="form-section__field--name">SKU</p>
+                        <input class="form-section__field--input" type="text" placeholder="Type product SKU here..." name="sku" value="${productData.sku || ''}">
+                    </div>
+                    <div class="form-section__field">
+                        <p class="form-section__field--name">Barcode</p>
+                        <input class="form-section__field--input" type="text" placeholder="Product barcode..." name="barcode" value="${productData.barcode || ''}">
+                    </div>
+                    <div class="form-section__field">
+                        <p class="form-section__field--name">Quantity</p>
+                        <input class="form-section__field--input" type="text" placeholder="Type product quantity here..." name="quantity" value="${productData.quantity || ''}">
+                    </div> 
                 </div>
             </div>
         </div>

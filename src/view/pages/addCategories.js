@@ -3,6 +3,8 @@ import { caretRight, cross, save } from "./../../assets/icon";
 import "./../../assets/css/categoryForm.css";
 import { Category } from "../../model/category.model";
 import CategoryController from "../../controller/CategoryController";
+import { showLoading, hideLoading } from "../../utils/loading.js";
+import { createToast } from "../../utils/toast.js";
 
 class addCategories {  
     constructor() {
@@ -50,6 +52,7 @@ class addCategories {
     
         if (!nameInput || !descriptionInput || !imageInput) {
             console.error('One or more form elements not found');
+            createToast('Form elements not found', 'error');
             return;
         }
     
@@ -62,56 +65,67 @@ class addCategories {
     
         const validation = this.controller.validateFormData(formData);
         if (!validation.isValid) {
-            alert(Object.values(validation.errors)[0]);
+            createToast(Object.values(validation.errors)[0], 'error');
             return;
         }
 
-        this.controller.setButtonLoading(submitButton, true);
-    
         try {
+            showLoading();
+            this.controller.setButtonLoading(submitButton, true);
+            
             const imageUrl = await this.controller.handleImageUpload(formData.imageUrl);
             const categoryData = new Category(formData.name, formData.description, imageUrl);
             await this.controller.saveCategory(categoryData);
             
-            alert('Category added successfully!');
+            createToast('Category added successfully!', 'success');
             this.controller.redirect('/category');
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to add category. Please try again.');
+            createToast('Failed to add category', 'error');
         } finally {
+            hideLoading();
             this.controller.setButtonLoading(submitButton, false);
         }
     }
 
     render() {
-        const content = `
-           <div class="product-list">
-                <div class="product-title">
-                    <div class="product-title-left">
-                        <p class="product-title-left__name">Categories</p>
-                        <div class="product-title-left__breadcrumb">
-                            <a href="/dashboard"><p class="product-title-left__breadcrumb--active">Dashboard</p></a>
-                            <figure><img src="${caretRight}" alt="arrow right" class="product-title__icon" /></figure>
-                            <a href="/category"><p class="product-title-left__breadcrumb--active">Category List</p></a>
-                            <figure><img src="${caretRight}" alt="arrow right" class="product-title__icon" /></figure>
-                            <p class="product-title-left__breadcrumb--normal">Add Category</p>
-                        </div>   
+        try {
+            showLoading();
+            const content = `
+               <div class="product-list">
+                    <div class="product-title">
+                        <div class="product-title-left">
+                            <p class="product-title-left__name">Categories</p>
+                            <div class="product-title-left__breadcrumb">
+                                <a href="/dashboard"><p class="product-title-left__breadcrumb--active">Dashboard</p></a>
+                                <figure><img src="${caretRight}" alt="arrow right" class="product-title__icon" /></figure>
+                                <a href="/category"><p class="product-title-left__breadcrumb--active">Category List</p></a>
+                                <figure><img src="${caretRight}" alt="arrow right" class="product-title__icon" /></figure>
+                                <p class="product-title-left__breadcrumb--normal">Add Category</p>
+                            </div>   
+                        </div>
+                        <div class="product-title__buttons">  
+                            <button class="product-title__buttons--cancel">
+                                <figure class="button__icon"><img src="${cross}" alt="icon"/></figure>
+                                <span class="button__text">Cancel</span>
+                            </button>
+                            <button class="product-title__buttons--add" id="addCategory">
+                                <figure class="button__icon"><img src="${save}" alt="icon" /></figure>
+                                <span class="button__text">Add Category</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="product-title__buttons">  
-                        <button class="product-title__buttons--cancel">
-                            <figure class="button__icon"><img src="${cross}" alt="icon"/></figure>
-                            <span class="button__text">Cancel</span>
-                        </button>
-                        <button class="product-title__buttons--add" id="addCategory">
-                            <figure class="button__icon"><img src="${save}" alt="icon" /></figure>
-                            <span class="button__text">Add Category</span>
-                        </button>
-                    </div>
+                    ${categoryForm({ mode: 'create' })}
                 </div>
-                ${categoryForm({ mode: 'create' })}
-            </div>
-        `;
-        document.querySelector(".content").innerHTML = content;
+            `;
+            document.querySelector(".content").innerHTML = content;
+            createToast('Form loaded successfully', 'success');
+        } catch (error) {
+            console.error('Error rendering form:', error);
+            createToast('Failed to load form', 'error');
+        } finally {
+            hideLoading();
+        }
     }
 }
 

@@ -1,8 +1,11 @@
-import { caretRight, download, add, caretLeft, checkbox, minus, caretDown } from "./../../assets/icon";
+import { caretRight, download, add, caretLeft, checkbox, minus, caretDown, trash } from "./../../assets/icon";
 import searchBar from "./../components/searchBar";
 import ProductRow from "./../components/productRow";  
 import axios from "axios";
 import { setupPaginationEvents } from "../../utils/setupPaginationEvents.js";
+import { showLoading, hideLoading } from "../../utils/loading.js";
+import { createToast } from "../../utils/toast.js";
+import { showConfirmDialog } from '../components/confirmDialog.js';
 
 class ProductListView {
 
@@ -14,46 +17,121 @@ class ProductListView {
       this.currentFilter = 'all';
       this.searchQuery = '';
       this.searchTimeout = null; // For debouncing
+      this.API_URL = 'https://67c09c48b9d02a9f224a690e.mockapi.io/api';
+      this.selectedProducts = new Set();
   
       this.init();
     }
 
   async fetchProducts() {
     try {
-      const response = await axios.get("https://67c09c48b9d02a9f224a690e.mockapi.io/api/product");
-      let products = response.data;
-
-      this.products = products
-
+      showLoading();
+      const response = await axios.get(`${this.API_URL}/product`);
+      this.products = response.data;
       this.maxPage = Math.ceil(this.products.length / this.itemsPerPage); 
-      this.render(); 
+      this.render();
+      createToast('Products loaded successfully', 'success');
     } catch (error) {
       console.error("Error fetching products:", error);
-      // this.products = Array.from({ length: 50 }, (_, i) => ({
-      //   id: i + 1,
-      //   name: `Product ${i + 1}`,
-      //   price: (i + 1) * 10,
-      //   status: i % 4 === 0
-      //     ? "Low Stock"
-      //     : i % 4 === 1
-      //     ? "Out of Stock"
-      //     : i % 4 === 2
-      //     ? "Draft"
-      //     : "Published"
-      // }));
-
-      this.maxPage = Math.ceil(this.products.length / this.itemsPerPage);
-      this.render();
+      createToast('Failed to load products', 'error');
+    } finally {
+      hideLoading();
     }
   }
 
   async init() {
-    document.addEventListener("DOMContentLoaded", async () => {
-      await this.fetchProducts();
-      this.setupSearchEvent();
+    await this.fetchProducts();
+    this.setupSearchEvent();
+    this.setupDeleteHandlers();
+    this.setupBulkActions();
+  }
+
+  setupBulkActions() {
+    document.addEventListener('click', (e) => {
+      const headerCheckbox = e.target.closest('.product-table-header__imageleft--first');
+      if (headerCheckbox) {
+        const allCheckboxes = document.querySelectorAll('.product-table__name__checkbox--check');
+        const allRows = document.querySelectorAll('.product-table__row');
+        
+        const isHeaderChecked = headerCheckbox.classList.contains('checked');
+        headerCheckbox.classList.toggle('checked');
+        
+        allCheckboxes.forEach((checkbox, index) => {
+          if (!isHeaderChecked) {
+            checkbox.classList.add('checkactive');
+            allRows[index].classList.add('rowactive');
+            const productId = allRows[index].getAttribute('data-id');
+            if (productId) this.selectedProducts.add(productId);
+          } else {
+            checkbox.classList.remove('checkactive');
+            allRows[index].classList.remove('rowactive');
+            const productId = allRows[index].getAttribute('data-id');
+            if (productId) this.selectedProducts.delete(productId);
+          }
+        });
+      }
     });
   }
 
+  async handleBulkDelete() {
+    if (this.selectedProducts.size === 0) return;
+
+    showConfirmDialog({
+      title: 'Delete Products',
+      message: `Are you sure you want to delete ${this.selectedProducts.size} selected products?`,
+      onConfirm: async () => {
+        try {
+          showLoading();
+          const deletePromises = Array.from(this.selectedProducts).map(id => 
+            axios.delete(`${this.API_URL}/product/${id}`)
+          );
+          await Promise.all(deletePromises);
+          this.products = this.products.filter(p => !this.selectedProducts.has(p.id));
+          this.selectedProducts.clear();
+          this.renderTableOnly();
+          createToast('Selected products deleted successfully', 'success');
+        } catch (error) {
+          console.error('Error deleting products:', error);
+          createToast('Failed to delete some products', 'error');
+        } finally {
+          hideLoading();
+        }
+      }
+    });
+  }
+
+  setupDeleteHandlers() {
+    document.addEventListener('click', async (e) => {
+      const deleteButton = e.target.closest('.product-table__delete');
+      if (deleteButton) {
+        const row = deleteButton.closest('tr');
+        const productId = row.getAttribute('data-id');
+        
+        if (this.selectedProducts.size > 0) {
+          this.handleBulkDelete();
+        } else if (productId) {
+          showConfirmDialog({
+            title: 'Delete Product',
+            message: 'Are you sure you want to delete this product?',
+            onConfirm: async () => {
+              try {
+                showLoading();
+                await axios.delete(`${this.API_URL}/product/${productId}`);
+                this.products = this.products.filter(p => p.id !== productId);
+                this.renderTableOnly();
+                createToast('Product deleted successfully', 'success');
+              } catch (error) {
+                console.error('Error deleting product:', error);
+                createToast('Failed to delete product', 'error');
+              } finally {
+                hideLoading();
+              }
+            }
+          });
+        }
+      }
+    });
+  }
 
   getPaginatedProducts() {
     const filteredProducts = this.filterProducts(this.products);
@@ -123,15 +201,23 @@ class ProductListView {
   }
 
   clickTable = () => {
-    const cliks = document.querySelectorAll('.product-table__name__checkbox--check');
-    const checks = document.querySelectorAll(".product-table__row");
+    const checkboxes = document.querySelectorAll('.product-table__name__checkbox--check');
+    const rows = document.querySelectorAll(".product-table__row");
 
-    cliks.forEach((clik, index) => {
-      clik.addEventListener('click', () => {
-        clik.classList.toggle('checkactive'); // Toggle class checkactive cho phần tử được nhấp
-        checks[index].classList.toggle('rowactive'); // Toggle class rowactive cho hàng tương ứng
-        //toggle thêm nếu chưa có hủy nếu có else
-      }); 
+    checkboxes.forEach((checkbox, index) => {
+      checkbox.addEventListener('click', () => {
+        checkbox.classList.toggle('checkactive');
+        rows[index].classList.toggle('rowactive');
+        
+        const productId = rows[index].getAttribute('data-id');
+        if (productId) {
+          if (checkbox.classList.contains('checkactive')) {
+            this.selectedProducts.add(productId);
+          } else {
+            this.selectedProducts.delete(productId);
+          }
+        }
+      });
     });
   } 
 
@@ -196,15 +282,15 @@ class ProductListView {
         <div class="tag-add-searchbar"> 
           <div class="tag-add-searchbar__tag">
             <div class="tag-add-searchbar__tag--item">
-              <span class="tag-add-searchbar__tag--item-element ">All Products</span>
+              <span class="tag-add-searchbar__tag--item-element">All Products</span>
             </div>
-            <div class="tag-add-searchbar__tag--item ">
+            <div class="tag-add-searchbar__tag--item">
               <span class="tag-add-searchbar__tag--item-element">Published</span>
             </div> 
-            <div class="tag-add-searchbar__tag--item ">
+            <div class="tag-add-searchbar__tag--item">
               <span class="tag-add-searchbar__tag--item-element">Low Stock</span>
             </div>
-           <div class="tag-add-searchbar__tag--item">
+            <div class="tag-add-searchbar__tag--item">
               <span class="tag-add-searchbar__tag--item-element">Draft</span>
             </div>
           </div>
@@ -343,18 +429,19 @@ class ProductListView {
   renderTableOnly() {
     const filteredProducts = this.filterProducts(this.products);
     this.maxPage = Math.ceil(filteredProducts.length / this.itemsPerPage) || 1;
+    
+    // Ensure current page is valid
+    if (this.currentPage > this.maxPage) {
+      this.currentPage = this.maxPage;
+    }
+    
     const paginatedProducts = this.getPaginatedProducts();
-
-    // Update only the table body
     const tableBody = document.querySelector('.product-table tbody');
     if (tableBody) {
       tableBody.innerHTML = paginatedProducts.map(product => ProductRow({ product })).join('');
+      this.clickTable();
     }
-
-    // Update pagination
     this.renderPagination();
-    setupPaginationEvents();
-    this.clickTable();
   }
 }
 
