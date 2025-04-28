@@ -37,12 +37,12 @@ function categoryForm(props = { mode: 'create', categoryData: {} }) {
                         <label class="form-field__label">Category Name</label>
                         <input 
                             type="text" 
-                            class="form-field__input" 
-                            placeholder="Type category name here..." 
-                            name="categoryName" 
-                            value="${categoryData.name || ''}"
+                        class="form-field__input" 
+                        placeholder="Type category name here..." 
+                        name="categoryName" 
+                        value="${categoryData.name || ''}"
                         />
-                    </div>
+                    </div>  
                     <div class="form-field">
                         <label class="form-field__label">Description</label>
                         <textarea 

@@ -69,6 +69,16 @@
                     border-radius: 0.5rem;
                     border: 1px solid $neutralGray100;
                     background: $neutralGray25;  
+
+                    &:focus{
+                        outline: none;
+                        border: 1px solid $primary500;
+                    }
+
+                    &:active{
+                        outline: none;
+                        border: 1px solid $primary500;
+                    }
                 }
                 &--textarea{
                     width: 100%;
@@ -81,12 +91,17 @@
     
                     border-radius: 0.5rem;
                     border: 1px solid $neutralGray100;
-                    background: $neutralGray25;       
+                    background: $neutralGray25; 
+                    
+                    &:active{
+                        outline: none;
+                        border: 1px solid $primary500;
+                    }
                     
                     &::placeholder {
                         font-family: "Public Sans";
                         color: $neutralGray500;
-                      }
+                    }
                 }
             }   
 
